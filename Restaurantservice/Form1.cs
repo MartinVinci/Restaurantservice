@@ -15,6 +15,24 @@ namespace Restaurantservice
         public Form1()
         {
             InitializeComponent();
+            CreateTentativeOrders();
         }
+
+        private void btnTentativeOrders_Click(object sender, EventArgs e)
+        {
+            CreateTentativeOrders();
+        }
+
+        private void btnCreateLabels_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void CreateTentativeOrders()
+        {
+            PdfCreator.CreateTentativeOrder();
+        }
+
+
     }
 }
