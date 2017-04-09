@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace Restaurantservice
 {
-    public class Label
+    public class Order
     {
-
         public string Name { get; set; }
         public string Dish { get; set; }
         public string Date { get; set; }
@@ -16,7 +15,7 @@ namespace Restaurantservice
         public string Logo { get; set; }
         public bool DeliverCold { get; set; }
 
-        public Label(string name, string dish, string date, string addr, bool deliverCold)
+        public Order(string name, string dish, string date, string addr, bool deliverCold)
         {
             Name = name;
             Dish = dish;

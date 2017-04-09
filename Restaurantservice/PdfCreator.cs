@@ -12,61 +12,149 @@ namespace Restaurantservice
 {
     public class PdfCreator
     {
+        private const string TYPE_TENTATIVE = "Tentative";
+        private const string TYPE_LABEL = "Label";
 
-        public static void CreateTentativeOrder()
+        #region Tentative Orders
+
+        public static void CreateTentativeOrders(List<TentativeOrder> orders, DateTime deliveryDate)
         {
+            // Initial set up for page
             PdfDocument pdf = new PdfDocument();
-            pdf.Info.Title = "Preliminär beställning " + DateTime.Now.ToString();
+            pdf.Info.Title = "Preliminära beställningar " + deliveryDate.ToShortDateString();
+            PdfPage pdfPage = pdf.AddPage();
+
+            XFont fontName = new XFont("Times New Roman", 20, XFontStyle.Regular);
+            XFont fontOther = new XFont("Times New Roman", 10, XFontStyle.Regular);
+
+            XGraphics graph = XGraphics.FromPdfPage(pdfPage);
+
+            // Write initial information
+            string prelText = string.Format("Preliminära beställningar för: {0}.", deliveryDate.ToShortDateString());
+            graph.DrawString(prelText, fontName, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), 35, 30, XStringFormats.TopLeft);
+            
+            string lookupText = string.Format("Informationen hämtad från databas: {0}.", DateTime.Now);
+            graph.DrawString(lookupText, fontOther, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), 35, 60, XStringFormats.TopLeft);
+
+            // Set beginning coordinates
+            int nameXCoord = 40;
+            int nameYCoord = 90;
+            int quantityXCoord = 500;
+            int quantityYCoord = 90;
+
+            if (orders.Count > 0)
+            {
+                foreach (var item in orders)
+                {
+                    graph.DrawString(item.DishName, fontName, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), nameXCoord, nameYCoord, XStringFormats.TopLeft);
+                    graph.DrawString(item.Quantity.ToString(), fontName, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), quantityXCoord, quantityYCoord, XStringFormats.TopLeft);
+
+                    nameYCoord += 35;
+                    quantityYCoord += 35;
+                }
+            }
+            else if (orders.Count == 0)
+            {
+                graph.DrawString("Det finns inga beställningar för denna dag.", fontName, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), nameXCoord, nameYCoord, XStringFormats.TopLeft);
+            }
+
+            string filePath = GetFileNameAndPath(TYPE_TENTATIVE);
+            pdf.Save(filePath);
+            Process.Start(filePath);
+        }
+        #endregion
+
+        #region Labels
+        public static void CreateLabels(List<Order> orders, string date)
+        {
+            #region Multiple orderlist when testdata only has a few rows.
+            var orders2 = DataAccess.GetTodaysOrders(date);
+
+            orders.AddRange(orders2);
+            orders.AddRange(orders2);
+            orders.AddRange(orders2);
+            orders.AddRange(orders2);
+
+            #endregion  
+            #region TestOrders without using database
+            //Order testLabel1 = new Order("Gunnel Nilsson", "Boef Bourguignon", "fredag 7/4", "Kyrkbyn", false);
+            //Order testLabel2 = new Order("Gunnel Nilsson", "Lasagne", "fredag 7/4", "En lång adress någonstans", true);
+            //Order testLabel3 = new Order("Gunnel Nilsson", "Boef Bourguignon", "fredag 7/4", "Kyrkbyn", true);
+            //Order testLabel4 = new Order("Gunnel Nilsson", "Spätta", "fredag 7/4", "Kyrkbyn", false);
+            //Order testLabel5 = new Order("Gunnel Nilsson", "Gravad lax", "fredag 7/4", "Kyrkbyn", false);
+            //Order testLabel6 = new Order("Gunnel Nilsson", "Boef Bourguignon", "fredag 7/4", "Kyrkbyn", true);
+            //Order testLabel7 = new Order("Gunnel Nilsson", "Boef Bourguignon", "fredag 7/4", "Kyrkbyn", false);
+            //Order testLabel8 = new Order("Gunnel Nilsson", "Boef Bourguignon", "fredag 7/4", "Kyrkbyn", true);
+            //Order testLabel9 = new Order("Gunnel Nilsson", "Boef Bourguignon", "fredag 7/4", "Kyrkbyn", false);
+            //Order testLabel10 = new Order("Gunnel Nilsson", "Boef Bourguignon", "fredag 7/4", "Kyrkbyn", true);
+
+
+            //DrawLabelOnPaper(graph, testLabel1, fontName, fontOther, 1);
+            //DrawLabelOnPaper(graph, testLabel2, fontName, fontOther, 2);
+            //DrawLabelOnPaper(graph, testLabel3, fontName, fontOther, 3);
+            //DrawLabelOnPaper(graph, testLabel4, fontName, fontOther, 4);
+            //DrawLabelOnPaper(graph, testLabel5, fontName, fontOther, 5);
+            //DrawLabelOnPaper(graph, testLabel6, fontName, fontOther, 6);
+            //DrawLabelOnPaper(graph, testLabel7, fontName, fontOther, 7);
+            //DrawLabelOnPaper(graph, testLabel8, fontName, fontOther, 8);
+            //DrawLabelOnPaper(graph, testLabel9, fontName, fontOther, 9);
+            //DrawLabelOnPaper(graph, testLabel10, fontName, fontOther, 10);
+
+            #endregion
+
+            // Sort by delivery address. 
+            orders = orders.OrderBy(o => o.Addr).ToList();
+
+            // Initial set up for page
+            PdfDocument pdf = new PdfDocument();
+            pdf.Info.Title = "Beställningar " + date;
             PdfPage pdfPage = pdf.AddPage();
 
             XFont fontName = new XFont("Times New Roman", 20, XFontStyle.Regular);
             XFont fontOther = new XFont("Times New Roman", 12, XFontStyle.Regular);
             XGraphics graph = XGraphics.FromPdfPage(pdfPage);
 
-            Label testLabel1 = new Label("Gunnel Nilsson", "Boef Bourguignon", "fredag 7/4", "Kyrkbyn", false);
-            Label testLabel2 = new Label("Gunnel Nilsson", "Lasagne", "fredag 7/4", "En lång adress någonstans", true);
-            Label testLabel3 = new Label("Gunnel Nilsson", "Boef Bourguignon", "fredag 7/4", "Kyrkbyn", true);
-            Label testLabel4 = new Label("Gunnel Nilsson", "Spätta", "fredag 7/4", "Kyrkbyn", false);
-            Label testLabel5 = new Label("Gunnel Nilsson", "Gravad lax", "fredag 7/4", "Kyrkbyn", false);
-            Label testLabel6 = new Label("Gunnel Nilsson", "Boef Bourguignon", "fredag 7/4", "Kyrkbyn", true);
-            Label testLabel7 = new Label("Gunnel Nilsson", "Boef Bourguignon", "fredag 7/4", "Kyrkbyn", false);
-            Label testLabel8 = new Label("Gunnel Nilsson", "Boef Bourguignon", "fredag 7/4", "Kyrkbyn", true);
-            Label testLabel9 = new Label("Gunnel Nilsson", "Boef Bourguignon", "fredag 7/4", "Kyrkbyn", false);
-            Label testLabel10 = new Label("Gunnel Nilsson", "Boef Bourguignon", "fredag 7/4", "Kyrkbyn", true);
 
-
-            //XTextFormatter tf = new XTextFormatter(graph);
-
-            //tf.Alignment = XParagraphAlignment.Center;
-            //tf.DrawString("hej", fontName, XBrushes.Black,  XStringFormats.TopLeft);
-
-            DrawOnPaper(graph, testLabel1, fontName, fontOther, 1);
-            DrawOnPaper(graph, testLabel2, fontName, fontOther, 2);
-            DrawOnPaper(graph, testLabel3, fontName, fontOther, 3);
-            DrawOnPaper(graph, testLabel4, fontName, fontOther, 4);
-            DrawOnPaper(graph, testLabel5, fontName, fontOther, 5);
-            DrawOnPaper(graph, testLabel6, fontName, fontOther, 6);
-            DrawOnPaper(graph, testLabel7, fontName, fontOther, 7);
-            DrawOnPaper(graph, testLabel8, fontName, fontOther, 8);
-            DrawOnPaper(graph, testLabel9, fontName, fontOther, 9);
-            DrawOnPaper(graph, testLabel10, fontName, fontOther, 10);
-
-            //graph.DrawString("1", fontName, XBrushes.Black, new XRect(0, 0, pdfPage.Width.Millimeter, pdfPage.Height.Millimeter), XStringFormats.TopLeft);
-
+            /* Will during runtime have values between 1-10, sets position on label paper.
+             * 12
+             * 34
+             * 56
+             * 78
+             * 9 10   */
+            int counterPlaceHolder = 0;
+            
             // Draw the text
+            foreach (var order in orders)
+            {
+                counterPlaceHolder++;
+                DrawLabelOnPaper(graph, order, fontName, fontOther, counterPlaceHolder);
 
+                // Used when one paper is full
+                if (counterPlaceHolder == 10)
+                {
+                    counterPlaceHolder = 0;
+                    var newPage = pdf.AddPage();
+                    graph.Dispose();
+                    graph = XGraphics.FromPdfPage(newPage);
+                }
+            }
 
-            string filePath = GetFileNameAndPath();
+            // Save Pdf on disk
+            string filePath = GetFileNameAndPath(TYPE_LABEL);
             pdf.Save(filePath);
             Process.Start(filePath);
         }
-        private static void DrawOnPaper(XGraphics graph, Label label, XFont fontName, XFont fontOther, int position)
+        
+        private static void DrawLabelOnPaper(XGraphics graph, Order label, XFont fontName, XFont fontOther, int position)
         {
             Coordinate coord;
+
+            // Left and right columns will have same X coordinates
             int Xleft = 160;
             int Xright = 440;
 
-            int sp = 0; // startposition
+            // Startposition
+            int sp = 0; 
 
             switch (position)
             {
@@ -115,10 +203,9 @@ namespace Restaurantservice
                     break;
             }
 
-
-            DrawOnPaperByPosition(graph, label, fontName, fontOther, coord);
+            DrawLabelOnPaperByPosition(graph, label, fontName, fontOther, coord);
         }
-        private static void DrawOnPaperByPosition(XGraphics graph, Label label, XFont fontName, XFont fontOther, Coordinate c)
+        private static void DrawLabelOnPaperByPosition(XGraphics graph, Order label, XFont fontName, XFont fontOther, Coordinate c)
         {
             graph.DrawString(label.Name, fontName, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), c.NameXcoord, c.NameYcoord, XStringFormats.Center);
             graph.DrawString(label.Dish, fontOther, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), c.DishXcoord, c.DishYcoord, XStringFormats.Center);
@@ -131,15 +218,26 @@ namespace Restaurantservice
             {
                 graph.DrawString("Levereras kall", fontName, new XSolidBrush(XColor.FromCmyk(100, 33, 0, 0)), c.ColdXcoord, c.ColdYcoord, XStringFormats.Center);
             }
-
         }
-        private static string GetFileNameAndPath()
+
+        #endregion
+
+        private static string GetFileNameAndPath(string type)
         {
             string time = string.Format(DateTime.Now.ToString());
             time = time.Replace(':', '-');
             time = time.Replace(' ', '_');
             string pdfFilename = string.Format("{0}.pdf", time);
-            string filePath = @"C:\PreliminaraBestallningar\" + pdfFilename;
+
+            string filePath = "";
+            if (type == TYPE_TENTATIVE)
+            {
+                filePath = @"C:\Bestallning\PreliminaraBestallningar\" + "Prel_" + pdfFilename;
+            }
+            else if (type == TYPE_LABEL)
+            {
+                filePath = @"C:\Bestallning\Etiketter\" + "Etiketter_" + pdfFilename;
+            }
 
             return filePath;
         }

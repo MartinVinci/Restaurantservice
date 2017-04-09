@@ -21,29 +21,98 @@ namespace Restaurantservice
         public Form1()
         {
             InitializeComponent();
-            DoStuff2();
-            //DbConfiguration.SetConfiguration(new MySqlEFConfiguration()); 
-            //CreateTentativeOrders();
+            CustomInitialize();
+            //TODO Remove this line
+            //CreateTentativeOrders(DateTime.Now);
+            //CreateLabels("2017-04-15");
+        }
+        private void CustomInitialize()
+        {
+            rbnTodaysDate.Checked = true;
+            dtpDateTimePicker.Enabled = false;
+            
+        }
+        private void rbnPickDate_CheckedChanged(object sender, EventArgs e)
+        {
+            RadioButton rb = sender as RadioButton;
+            if (rb != null)
+            {
+                if (rb.Checked)
+                {
+                    dtpDateTimePicker.Enabled = true;
+                }
+            }
+        }
+        private void rbnTodaysDate_CheckedChanged(object sender, EventArgs e)
+        {
+            RadioButton rb = sender as RadioButton;
+            if (rb != null)
+            {
+                if (rb.Checked)
+                {
+                    dtpDateTimePicker.Enabled = false;
+                }
+            }
         }
 
         private void btnTentativeOrders_Click(object sender, EventArgs e)
         {
-            //CreateTentativeOrders();
+            if (rbnTodaysDate.Checked == true)
+            {
+                CreateTentativeOrders(DateTime.Now);
+            }
+            else if (rbnPickDate.Checked == true)
+            {
+                CreateTentativeOrders(dtpDateTimePicker.Value);
+            }
         }
 
         private void btnCreateLabels_Click(object sender, EventArgs e)
         {
-
+            CreateLabels(DateTime.Now.ToShortDateString());
         }
 
-        private void CreateTentativeOrders()
+        private void CreateTentativeOrders(DateTime deliveryDate)
         {
-            PdfCreator.CreateTentativeOrder();
+            // TODO Skapa string
+
+            string dateAsString = deliveryDate.ToShortDateString();
+            List<Order> orders = DataAccess.GetTodaysOrders(dateAsString);
+
+            List<TentativeOrder> tentativeOrders = GetTentativeOrders(orders);
+
+            PdfCreator.CreateTentativeOrders(tentativeOrders, deliveryDate);
+        }
+        private List<TentativeOrder> GetTentativeOrders(List<Order> orders)
+        {
+            List<string> uniqueDishes = (from o in orders
+                                         orderby o.Dish
+                                         select o.Dish).Distinct().ToList();
+
+            List<TentativeOrder> tentativeOrders = new List<TentativeOrder>();
+
+            foreach (var item in uniqueDishes)
+            {
+                var count = (from o in orders
+                             where o.Dish == item
+                             select o).Count();
+
+                tentativeOrders.Add(new TentativeOrder(item, count));
+            }
+
+            return tentativeOrders;
+        }
+        private void CreateLabels(string date)
+        {
+            List<Order> orders = DataAccess.GetTodaysOrders(date);
+
+            PdfCreator.CreateLabels(orders, date);
         }
 
-        //private DataSet dset;
-        //private BilarDS bilarDset = new BilarDS();
 
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+        #region Garbage
         private void DoStuff()
         {
             var conn = new MySqlConnection();
@@ -75,60 +144,9 @@ namespace Restaurantservice
             MessageBox.Show("Yes!!!");
 
         }
-        private void DoStuff2()
-        {
-            //string conString = "server=mysql507.loopia.se; userid=wp_admin@b113010; password=mediakonstren99; database=bradgard_nu;";
 
-            //conn.ConnectionString = "server=mysql507.loopia.se; userid=wp_admin@b113010; password=mediakonstren99; database=bradgard_nu;";
+        #endregion
 
-
-            var conn = new MySqlConnection();
-
-            conn.ConnectionString = "server=mysql507.loopia.se; userid=wp_admin@b113010; password=mediakonsten99; database=bradgard_nu;";
-            //string cs = "server=mysql507.loopia.se; userid=wp_admin@b113010; password=mediakonstren99; database=bradgard_nu;";
-
-            //MySqlConnection conn = null;
-            MySqlDataReader rdr = null;
-
-            try
-            {
-                //conn = new MySqlConnection(cs);
-                conn.Open();
-
-                string stm = "SELECT * FROM kgportal_orders";
-                MySqlCommand cmd = new MySqlCommand(stm, conn);
-                rdr = cmd.ExecuteReader();
-
-                while (rdr.Read())
-                {
-                    var asdf = rdr.GetInt32(0) + " : "
-                        + rdr.GetString(1) + " : "
-                        + rdr.GetString(2);
-
-                    MessageBox.Show(rdr.GetInt32(0) + " : "
-                        + rdr.GetString(1) + " : "
-                        + rdr.GetString(2));
-                }
-
-            }
-            catch (MySqlException ex)
-            {
-                var stophere = 2;
-            }
-            finally
-            {
-                if (rdr != null)
-                {
-                    rdr.Close();
-                }
-
-                if (conn != null)
-                {
-                    conn.Close();
-                }
-
-            }
-        }
     }
 }
 
