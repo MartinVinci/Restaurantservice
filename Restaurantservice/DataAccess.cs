@@ -15,11 +15,11 @@ namespace Restaurantservice
     {
         public static List<Order> GetTodaysOrders(string deliveryDate)
         {
-            //TODO Remove this
-            if (deliveryDate == "0")
-            {
-                deliveryDate = "2017-04-15";
-            }
+            //// Use this during development if you want to set at specific date.
+            //if (deliveryDate == "0")
+            //{
+            //    deliveryDate = "2017-04-15";
+            //}
 
             var conn = new MySqlConnection();
             conn.ConnectionString = "server=mysql507.loopia.se; userid=wp_admin@b113010; password=mediakonsten99; database=bradgard_nu;";
@@ -33,7 +33,7 @@ namespace Restaurantservice
                 //conn = new MySqlConnection(cs);
                 conn.Open();
 
-                string stm = "SELECT * FROM kgportal_orders";
+                //string stm = "SELECT * FROM kgportal_orders";
 
                 string query = "SELECT bru.firstname, bru.lastname, pro.product_name, ord.delivery_date, bru.delivery_street, ord.served_cold "
                     + "FROM kgportal_orders as ord "
@@ -80,57 +80,57 @@ namespace Restaurantservice
 
             return orders;
         }
-        private void DoStuff2()
-        {
-            //string conString = "server=mysql507.loopia.se; userid=wp_admin@b113010; password=mediakonstren99; database=bradgard_nu;";
+        //private void DoStuff2()
+        //{
+        //    //string conString = "server=mysql507.loopia.se; userid=wp_admin@b113010; password=mediakonstren99; database=bradgard_nu;";
 
-            //conn.ConnectionString = "server=mysql507.loopia.se; userid=wp_admin@b113010; password=mediakonstren99; database=bradgard_nu;";
+        //    //conn.ConnectionString = "server=mysql507.loopia.se; userid=wp_admin@b113010; password=mediakonstren99; database=bradgard_nu;";
 
 
-            var conn = new MySqlConnection();
+        //    var conn = new MySqlConnection();
 
-            conn.ConnectionString = "server=mysql507.loopia.se; userid=wp_admin@b113010; password=mediakonsten99; database=bradgard_nu;";
-            //string cs = "server=mysql507.loopia.se; userid=wp_admin@b113010; password=mediakonstren99; database=bradgard_nu;";
+        //    conn.ConnectionString = "server=mysql507.loopia.se; userid=wp_admin@b113010; password=mediakonsten99; database=bradgard_nu;";
+        //    //string cs = "server=mysql507.loopia.se; userid=wp_admin@b113010; password=mediakonstren99; database=bradgard_nu;";
 
-            //MySqlConnection conn = null;
-            MySqlDataReader rdr = null;
+        //    //MySqlConnection conn = null;
+        //    MySqlDataReader rdr = null;
 
-            try
-            {
-                //conn = new MySqlConnection(cs);
-                conn.Open();
+        //    try
+        //    {
+        //        //conn = new MySqlConnection(cs);
+        //        conn.Open();
 
-                string stm = "SELECT * FROM kgportal_orders";
-                MySqlCommand cmd = new MySqlCommand(stm, conn);
-                rdr = cmd.ExecuteReader();
+        //        string stm = "SELECT * FROM kgportal_orders";
+        //        MySqlCommand cmd = new MySqlCommand(stm, conn);
+        //        rdr = cmd.ExecuteReader();
 
-                while (rdr.Read())
-                {
-                    var asdf = rdr.GetInt32(0) + " : "
-                        + rdr.GetString(1) + " : "
-                        + rdr.GetString(2);
+        //        while (rdr.Read())
+        //        {
+        //            var asdf = rdr.GetInt32(0) + " : "
+        //                + rdr.GetString(1) + " : "
+        //                + rdr.GetString(2);
 
-                }
+        //        }
 
-            }
-            catch (MySqlException ex)
-            {
+        //    }
+        //    catch (MySqlException ex)
+        //    {
 
-            }
-            finally
-            {
-                if (rdr != null)
-                {
-                    rdr.Close();
-                }
+        //    }
+        //    finally
+        //    {
+        //        if (rdr != null)
+        //        {
+        //            rdr.Close();
+        //        }
 
-                if (conn != null)
-                {
-                    conn.Close();
-                }
+        //        if (conn != null)
+        //        {
+        //            conn.Close();
+        //        }
 
-            }
-        }
+        //    }
+        //}
 
 
 

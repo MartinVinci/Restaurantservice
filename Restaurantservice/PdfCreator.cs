@@ -68,12 +68,12 @@ namespace Restaurantservice
         public static void CreateLabels(List<Order> orders, string date)
         {
             #region Multiple orderlist when testdata only has a few rows.
-            var orders2 = DataAccess.GetTodaysOrders(date);
+            //var orders2 = DataAccess.GetTodaysOrders(date);
 
-            orders.AddRange(orders2);
-            orders.AddRange(orders2);
-            orders.AddRange(orders2);
-            orders.AddRange(orders2);
+            //orders.AddRange(orders2);
+            //orders.AddRange(orders2);
+            //orders.AddRange(orders2);
+            //orders.AddRange(orders2);
 
             #endregion  
             #region TestOrders without using database

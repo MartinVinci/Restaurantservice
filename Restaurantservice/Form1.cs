@@ -65,11 +65,13 @@ namespace Restaurantservice
             {
                 CreateTentativeOrders(dtpDateTimePicker.Value);
             }
+            MessageBox.Show("Preliminära beställningar skapade!");
         }
 
         private void btnCreateLabels_Click(object sender, EventArgs e)
         {
             CreateLabels(DateTime.Now.ToShortDateString());
+            MessageBox.Show("Etiketter skapade!");
         }
 
         private void CreateTentativeOrders(DateTime deliveryDate)
@@ -146,6 +148,11 @@ namespace Restaurantservice
         }
 
         #endregion
+
+        private void btnCreateInvoices_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Ingen funktionalitet utvecklad för denna knapp än.");
+        }
 
     }
 }

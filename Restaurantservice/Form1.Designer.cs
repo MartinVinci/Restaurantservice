@@ -31,6 +31,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.label1 = new System.Windows.Forms.Label();
             this.btnCreateLabels = new System.Windows.Forms.Button();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.dtpDateTimePicker = new System.Windows.Forms.DateTimePicker();
@@ -39,7 +40,6 @@
             this.btnTentativeOrders = new System.Windows.Forms.Button();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.btnCreateInvoices = new System.Windows.Forms.Button();
-            this.label1 = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -68,6 +68,15 @@
             this.tabPage1.Size = new System.Drawing.Size(379, 204);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Etiketter";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(55, 12);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(215, 78);
+            this.label1.TabIndex = 2;
+            this.label1.Text = resources.GetString("label1.Text");
             // 
             // btnCreateLabels
             // 
@@ -152,15 +161,7 @@
             this.btnCreateInvoices.TabIndex = 1;
             this.btnCreateInvoices.Text = "Ta fram fakturaunderlag";
             this.btnCreateInvoices.UseVisualStyleBackColor = true;
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(55, 12);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(215, 78);
-            this.label1.TabIndex = 2;
-            this.label1.Text = resources.GetString("label1.Text");
+            this.btnCreateInvoices.Click += new System.EventHandler(this.btnCreateInvoices_Click);
             // 
             // Form1
             // 
