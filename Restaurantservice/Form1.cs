@@ -12,12 +12,17 @@ using MySql.Data.MySqlClient;
 using System.Data.Entity;
 using MySql.Data.Entity;
 using System.Data.SqlClient;
+using System.Configuration;
+
 
 namespace Restaurantservice
 {
     public partial class Form1 : Form
     {
+        public static string DATABASETEST = "BRADGARD_NU";
+        public static string DATABASELIVE = "KNIVOCHGAFFEL";
 
+        public static string DataBaseVersion = "";
         public Form1()
         {
             InitializeComponent();
@@ -30,7 +35,12 @@ namespace Restaurantservice
         {
             rbnTodaysDate.Checked = true;
             dtpDateTimePicker.Enabled = false;
-            
+            rbnRealDatabase.Checked = true;
+            rbnRealDatabase.Enabled = false;
+            rbnTestDataBase.Enabled = false;
+
+            DataBaseVersion = DATABASELIVE;
+
         }
         private void rbnPickDate_CheckedChanged(object sender, EventArgs e)
         {
@@ -54,7 +64,29 @@ namespace Restaurantservice
                 }
             }
         }
+        private void rbnTestDataBase_CheckedChanged(object sender, EventArgs e)
+        {
+            RadioButton rb = sender as RadioButton;
+            if (rb != null)
+            {
+                if (rb.Checked)
+                {
+                    DataBaseVersion = DATABASETEST;
+                }
+            }
+        }
 
+        private void rbnRealDatabase_CheckedChanged(object sender, EventArgs e)
+        {
+            RadioButton rb = sender as RadioButton;
+            if (rb != null)
+            {
+                if (rb.Checked)
+                {
+                    DataBaseVersion = DATABASELIVE;
+                }
+            }
+        }
         private void btnTentativeOrders_Click(object sender, EventArgs e)
         {
             if (rbnTodaysDate.Checked == true)
@@ -65,25 +97,52 @@ namespace Restaurantservice
             {
                 CreateTentativeOrders(dtpDateTimePicker.Value);
             }
-            MessageBox.Show("Preliminära beställningar skapade!");
         }
 
         private void btnCreateLabels_Click(object sender, EventArgs e)
         {
-            CreateLabels(DateTime.Now.ToShortDateString());
-            MessageBox.Show("Etiketter skapade!");
+            // Today
+            CreateLabels(DateTime.Now.ToShortDateString(), false);
+
+            // Tomorrow
+            DateTime nextDeliveryDate = DateTime.Now;
+            int dayOfWeek = (int)nextDeliveryDate.DayOfWeek;
+
+            int tomorrow = dayOfWeek++;
+
+            if (dayOfWeek == 5)
+            {
+                nextDeliveryDate = nextDeliveryDate.AddDays(3);
+            }
+            else if (tomorrow == 6)
+            {
+                nextDeliveryDate = nextDeliveryDate.AddDays(2);
+            }
+            else 
+            {
+                nextDeliveryDate = nextDeliveryDate.AddDays(1);
+            }
+
+            CreateLabels(nextDeliveryDate.ToShortDateString(), true);
         }
 
         private void CreateTentativeOrders(DateTime deliveryDate)
         {
-            // TODO Skapa string
-
             string dateAsString = deliveryDate.ToShortDateString();
             List<Order> orders = DataAccess.GetTodaysOrders(dateAsString);
+            if (orders.Count == 0)
+            {
+                MessageBox.Show("Inga beställningar hittade");
+            }
+            else
+            {
+                List<TentativeOrder> tentativeOrders = GetTentativeOrders(orders);
 
-            List<TentativeOrder> tentativeOrders = GetTentativeOrders(orders);
+                PdfCreator.CreateTentativeOrders(tentativeOrders, deliveryDate);
+                MessageBox.Show("Preliminära beställningar skapade!");
 
-            PdfCreator.CreateTentativeOrders(tentativeOrders, deliveryDate);
+            }
+
         }
         private List<TentativeOrder> GetTentativeOrders(List<Order> orders)
         {
@@ -104,11 +163,23 @@ namespace Restaurantservice
 
             return tentativeOrders;
         }
-        private void CreateLabels(string date)
+        private void CreateLabels(string date, bool tomorrow)
         {
             List<Order> orders = DataAccess.GetTodaysOrders(date);
 
-            PdfCreator.CreateLabels(orders, date);
+            if (orders.Count == 0)
+            {
+                MessageBox.Show("Inga beställningar hittade");
+            }
+            else
+            {
+                PdfCreator.CreateLabels(orders, date, tomorrow);
+
+                if (tomorrow == false)
+                {
+                    MessageBox.Show("Etiketter skapade!");
+                }
+            }
         }
 
 
@@ -153,6 +224,21 @@ namespace Restaurantservice
         {
             MessageBox.Show("Ingen funktionalitet utvecklad för denna knapp än.");
         }
+
+        private void btnAdminPassWord_Click(object sender, EventArgs e)
+        {
+            if (tbxAdminPassWord.Text == "niklas")
+            {
+                rbnRealDatabase.Enabled = true;
+                rbnTestDataBase.Enabled = true;
+            }
+            else
+            {
+                MessageBox.Show("Fel lösenord");
+            }
+        }
+
+
 
     }
 }

@@ -22,10 +22,23 @@ namespace Restaurantservice
             //}
 
             var conn = new MySqlConnection();
-            conn.ConnectionString = "server=mysql507.loopia.se; userid=wp_admin@b113010; password=mediakonsten99; database=bradgard_nu;";
+
+            string dataBaseVersion = Form1.DataBaseVersion.ToString();
+
+            if (dataBaseVersion == Form1.DATABASELIVE)
+            {
+                // Kniv och gaffel
+                conn.ConnectionString = "server=mysql201.loopia.se; userid=admin@k159216; password=JeokDeeVCz; database=knivochgaffel_se;";
+            }
+            else if (dataBaseVersion == Form1.DATABASETEST)
+            {
+                // Brädgård_nu
+                conn.ConnectionString = "server=mysql507.loopia.se; userid=wp_admin@b113010; password=mediakonsten99; database=bradgard_nu;";
+            }
+
 
             MySqlDataReader rdr = null;
-            
+
             List<Order> orders = new List<Order>();
 
             try
@@ -62,7 +75,7 @@ namespace Restaurantservice
             }
             catch (MySqlException ex)
             {
-
+                System.Windows.Forms.MessageBox.Show(ex.ToString());
             }
             finally
             {

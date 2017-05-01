@@ -58,14 +58,14 @@ namespace Restaurantservice
                 graph.DrawString("Det finns inga beställningar för denna dag.", fontName, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), nameXCoord, nameYCoord, XStringFormats.TopLeft);
             }
 
-            string filePath = GetFileNameAndPath(TYPE_TENTATIVE);
+            string filePath = GetFileNameAndPath(TYPE_TENTATIVE, false);
             pdf.Save(filePath);
             Process.Start(filePath);
         }
         #endregion
 
         #region Labels
-        public static void CreateLabels(List<Order> orders, string date)
+        public static void CreateLabels(List<Order> orders, string date, bool tomorrow)
         {
             #region Multiple orderlist when testdata only has a few rows.
             //var orders2 = DataAccess.GetTodaysOrders(date);
@@ -140,9 +140,13 @@ namespace Restaurantservice
             }
 
             // Save Pdf on disk
-            string filePath = GetFileNameAndPath(TYPE_LABEL);
+            string filePath = GetFileNameAndPath(TYPE_LABEL, tomorrow);
             pdf.Save(filePath);
-            Process.Start(filePath);
+
+            if (tomorrow == false)
+            {
+                Process.Start(filePath);
+            }
         }
         
         private static void DrawLabelOnPaper(XGraphics graph, Order label, XFont fontName, XFont fontOther, int position)
@@ -222,9 +226,14 @@ namespace Restaurantservice
 
         #endregion
 
-        private static string GetFileNameAndPath(string type)
+        private static string GetFileNameAndPath(string type, bool tomorrow)
         {
-            string time = string.Format(DateTime.Now.ToString());
+            DateTime date = DateTime.Now;
+            if (tomorrow)
+            {
+                date = date.AddDays(1);
+            }
+            string time = string.Format(date.ToString());
             time = time.Replace(':', '-');
             time = time.Replace(' ', '_');
             string pdfFilename = string.Format("{0}.pdf", time);
@@ -236,7 +245,15 @@ namespace Restaurantservice
             }
             else if (type == TYPE_LABEL)
             {
-                filePath = @"C:\Bestallning\Etiketter\" + "Etiketter_" + pdfFilename;
+                if (tomorrow == false)
+                {
+                    filePath = @"C:\Bestallning\Etiketter\" + "Etiketter_" + pdfFilename;
+                }
+                else
+                {
+                    filePath = @"C:\Bestallning\Panikmapp\" + "Etiketter_" + pdfFilename;
+
+                }
             }
 
             return filePath;

@@ -21,7 +21,7 @@ namespace Restaurantservice
             Dish = dish;
             Date = date;
             Addr = addr;
-            Logo = @"..\..\Media\kniv-och-gaffel-logotyp-1.png";
+            Logo = @"C:\Bestallning\Logga\kniv-och-gaffel-logotyp-1.png";
             DeliverCold = deliverCold;
         }
     }

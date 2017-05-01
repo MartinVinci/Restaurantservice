@@ -40,10 +40,16 @@
             this.btnTentativeOrders = new System.Windows.Forms.Button();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.btnCreateInvoices = new System.Windows.Forms.Button();
+            this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.btnAdminPassWord = new System.Windows.Forms.Button();
+            this.tbxAdminPassWord = new System.Windows.Forms.TextBox();
+            this.rbnTestDataBase = new System.Windows.Forms.RadioButton();
+            this.rbnRealDatabase = new System.Windows.Forms.RadioButton();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.tabPage3.SuspendLayout();
+            this.tabPage4.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -51,6 +57,7 @@
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Controls.Add(this.tabPage3);
+            this.tabControl1.Controls.Add(this.tabPage4);
             this.tabControl1.Location = new System.Drawing.Point(13, 13);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -163,6 +170,60 @@
             this.btnCreateInvoices.UseVisualStyleBackColor = true;
             this.btnCreateInvoices.Click += new System.EventHandler(this.btnCreateInvoices_Click);
             // 
+            // tabPage4
+            // 
+            this.tabPage4.BackColor = System.Drawing.Color.Red;
+            this.tabPage4.Controls.Add(this.rbnRealDatabase);
+            this.tabPage4.Controls.Add(this.rbnTestDataBase);
+            this.tabPage4.Controls.Add(this.tbxAdminPassWord);
+            this.tabPage4.Controls.Add(this.btnAdminPassWord);
+            this.tabPage4.Location = new System.Drawing.Point(4, 22);
+            this.tabPage4.Name = "tabPage4";
+            this.tabPage4.Size = new System.Drawing.Size(379, 204);
+            this.tabPage4.TabIndex = 3;
+            this.tabPage4.Text = "Administratörssida";
+            // 
+            // btnAdminPassWord
+            // 
+            this.btnAdminPassWord.Location = new System.Drawing.Point(61, 38);
+            this.btnAdminPassWord.Name = "btnAdminPassWord";
+            this.btnAdminPassWord.Size = new System.Drawing.Size(100, 23);
+            this.btnAdminPassWord.TabIndex = 0;
+            this.btnAdminPassWord.Text = "Lås upp admin";
+            this.btnAdminPassWord.UseVisualStyleBackColor = true;
+            this.btnAdminPassWord.Click += new System.EventHandler(this.btnAdminPassWord_Click);
+            // 
+            // tbxAdminPassWord
+            // 
+            this.tbxAdminPassWord.Location = new System.Drawing.Point(61, 12);
+            this.tbxAdminPassWord.Name = "tbxAdminPassWord";
+            this.tbxAdminPassWord.Size = new System.Drawing.Size(100, 20);
+            this.tbxAdminPassWord.TabIndex = 1;
+            // 
+            // rbnTestDataBase
+            // 
+            this.rbnTestDataBase.AutoSize = true;
+            this.rbnTestDataBase.Location = new System.Drawing.Point(61, 89);
+            this.rbnTestDataBase.Name = "rbnTestDataBase";
+            this.rbnTestDataBase.Size = new System.Drawing.Size(84, 17);
+            this.rbnTestDataBase.TabIndex = 2;
+            this.rbnTestDataBase.TabStop = true;
+            this.rbnTestDataBase.Text = "Testdatabas";
+            this.rbnTestDataBase.UseVisualStyleBackColor = true;
+            this.rbnTestDataBase.CheckedChanged += new System.EventHandler(this.rbnTestDataBase_CheckedChanged);
+            // 
+            // rbnRealDatabase
+            // 
+            this.rbnRealDatabase.AutoSize = true;
+            this.rbnRealDatabase.Location = new System.Drawing.Point(61, 113);
+            this.rbnRealDatabase.Name = "rbnRealDatabase";
+            this.rbnRealDatabase.Size = new System.Drawing.Size(93, 17);
+            this.rbnRealDatabase.TabIndex = 3;
+            this.rbnRealDatabase.TabStop = true;
+            this.rbnRealDatabase.Text = "Riktig databas";
+            this.rbnRealDatabase.UseVisualStyleBackColor = true;
+            this.rbnRealDatabase.CheckedChanged += new System.EventHandler(this.rbnRealDatabase_CheckedChanged);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -177,6 +238,8 @@
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
             this.tabPage3.ResumeLayout(false);
+            this.tabPage4.ResumeLayout(false);
+            this.tabPage4.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -194,6 +257,11 @@
         private System.Windows.Forms.TabPage tabPage3;
         private System.Windows.Forms.Button btnCreateInvoices;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TabPage tabPage4;
+        private System.Windows.Forms.RadioButton rbnRealDatabase;
+        private System.Windows.Forms.RadioButton rbnTestDataBase;
+        private System.Windows.Forms.TextBox tbxAdminPassWord;
+        private System.Windows.Forms.Button btnAdminPassWord;
     }
 }
 
