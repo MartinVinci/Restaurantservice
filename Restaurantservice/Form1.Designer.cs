@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.label1 = new System.Windows.Forms.Label();
@@ -41,10 +40,11 @@
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.btnCreateInvoices = new System.Windows.Forms.Button();
             this.tabPage4 = new System.Windows.Forms.TabPage();
-            this.btnAdminPassWord = new System.Windows.Forms.Button();
-            this.tbxAdminPassWord = new System.Windows.Forms.TextBox();
-            this.rbnTestDataBase = new System.Windows.Forms.RadioButton();
             this.rbnRealDatabase = new System.Windows.Forms.RadioButton();
+            this.rbnTestDataBase = new System.Windows.Forms.RadioButton();
+            this.tbxAdminPassWord = new System.Windows.Forms.TextBox();
+            this.btnAdminPassWord = new System.Windows.Forms.Button();
+            this.lblVersion = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -81,13 +81,14 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(55, 12);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(215, 78);
+            this.label1.Size = new System.Drawing.Size(215, 52);
             this.label1.TabIndex = 2;
-            this.label1.Text = resources.GetString("label1.Text");
+            this.label1.Text = "När du trycker på knappen kommer dagens \r\nbeställningar hämtas från databasen.\r\n\r" +
+    "\nTryck inte på knappen innan stopptiden!\r\n";
             // 
             // btnCreateLabels
             // 
-            this.btnCreateLabels.Location = new System.Drawing.Point(58, 103);
+            this.btnCreateLabels.Location = new System.Drawing.Point(58, 90);
             this.btnCreateLabels.Name = "btnCreateLabels";
             this.btnCreateLabels.Size = new System.Drawing.Size(212, 85);
             this.btnCreateLabels.TabIndex = 1;
@@ -173,6 +174,7 @@
             // tabPage4
             // 
             this.tabPage4.BackColor = System.Drawing.Color.Red;
+            this.tabPage4.Controls.Add(this.lblVersion);
             this.tabPage4.Controls.Add(this.rbnRealDatabase);
             this.tabPage4.Controls.Add(this.rbnTestDataBase);
             this.tabPage4.Controls.Add(this.tbxAdminPassWord);
@@ -183,22 +185,17 @@
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "Administratörssida";
             // 
-            // btnAdminPassWord
+            // rbnRealDatabase
             // 
-            this.btnAdminPassWord.Location = new System.Drawing.Point(61, 38);
-            this.btnAdminPassWord.Name = "btnAdminPassWord";
-            this.btnAdminPassWord.Size = new System.Drawing.Size(100, 23);
-            this.btnAdminPassWord.TabIndex = 0;
-            this.btnAdminPassWord.Text = "Lås upp admin";
-            this.btnAdminPassWord.UseVisualStyleBackColor = true;
-            this.btnAdminPassWord.Click += new System.EventHandler(this.btnAdminPassWord_Click);
-            // 
-            // tbxAdminPassWord
-            // 
-            this.tbxAdminPassWord.Location = new System.Drawing.Point(61, 12);
-            this.tbxAdminPassWord.Name = "tbxAdminPassWord";
-            this.tbxAdminPassWord.Size = new System.Drawing.Size(100, 20);
-            this.tbxAdminPassWord.TabIndex = 1;
+            this.rbnRealDatabase.AutoSize = true;
+            this.rbnRealDatabase.Location = new System.Drawing.Point(61, 113);
+            this.rbnRealDatabase.Name = "rbnRealDatabase";
+            this.rbnRealDatabase.Size = new System.Drawing.Size(93, 17);
+            this.rbnRealDatabase.TabIndex = 3;
+            this.rbnRealDatabase.TabStop = true;
+            this.rbnRealDatabase.Text = "Riktig databas";
+            this.rbnRealDatabase.UseVisualStyleBackColor = true;
+            this.rbnRealDatabase.CheckedChanged += new System.EventHandler(this.rbnRealDatabase_CheckedChanged);
             // 
             // rbnTestDataBase
             // 
@@ -212,17 +209,31 @@
             this.rbnTestDataBase.UseVisualStyleBackColor = true;
             this.rbnTestDataBase.CheckedChanged += new System.EventHandler(this.rbnTestDataBase_CheckedChanged);
             // 
-            // rbnRealDatabase
+            // tbxAdminPassWord
             // 
-            this.rbnRealDatabase.AutoSize = true;
-            this.rbnRealDatabase.Location = new System.Drawing.Point(61, 113);
-            this.rbnRealDatabase.Name = "rbnRealDatabase";
-            this.rbnRealDatabase.Size = new System.Drawing.Size(93, 17);
-            this.rbnRealDatabase.TabIndex = 3;
-            this.rbnRealDatabase.TabStop = true;
-            this.rbnRealDatabase.Text = "Riktig databas";
-            this.rbnRealDatabase.UseVisualStyleBackColor = true;
-            this.rbnRealDatabase.CheckedChanged += new System.EventHandler(this.rbnRealDatabase_CheckedChanged);
+            this.tbxAdminPassWord.Location = new System.Drawing.Point(61, 12);
+            this.tbxAdminPassWord.Name = "tbxAdminPassWord";
+            this.tbxAdminPassWord.Size = new System.Drawing.Size(100, 20);
+            this.tbxAdminPassWord.TabIndex = 1;
+            // 
+            // btnAdminPassWord
+            // 
+            this.btnAdminPassWord.Location = new System.Drawing.Point(61, 38);
+            this.btnAdminPassWord.Name = "btnAdminPassWord";
+            this.btnAdminPassWord.Size = new System.Drawing.Size(100, 23);
+            this.btnAdminPassWord.TabIndex = 0;
+            this.btnAdminPassWord.Text = "Lås upp admin";
+            this.btnAdminPassWord.UseVisualStyleBackColor = true;
+            this.btnAdminPassWord.Click += new System.EventHandler(this.btnAdminPassWord_Click);
+            // 
+            // lblVersion
+            // 
+            this.lblVersion.AutoSize = true;
+            this.lblVersion.Location = new System.Drawing.Point(3, 181);
+            this.lblVersion.Name = "lblVersion";
+            this.lblVersion.Size = new System.Drawing.Size(42, 13);
+            this.lblVersion.TabIndex = 4;
+            this.lblVersion.Text = "Version";
             // 
             // Form1
             // 
@@ -262,6 +273,7 @@
         private System.Windows.Forms.RadioButton rbnTestDataBase;
         private System.Windows.Forms.TextBox tbxAdminPassWord;
         private System.Windows.Forms.Button btnAdminPassWord;
+        private System.Windows.Forms.Label lblVersion;
     }
 }
 

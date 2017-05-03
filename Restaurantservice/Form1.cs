@@ -27,9 +27,6 @@ namespace Restaurantservice
         {
             InitializeComponent();
             CustomInitialize();
-            //TODO Remove this line
-            //CreateTentativeOrders(DateTime.Now);
-            //CreateLabels("2017-04-15");
         }
         private void CustomInitialize()
         {
@@ -38,10 +35,13 @@ namespace Restaurantservice
             rbnRealDatabase.Checked = true;
             rbnRealDatabase.Enabled = false;
             rbnTestDataBase.Enabled = false;
+            lblVersion.Text = "Version: 1.0 - 17-05-03";
 
             DataBaseVersion = DATABASELIVE;
 
         }
+
+        #region Forms actions
         private void rbnPickDate_CheckedChanged(object sender, EventArgs e)
         {
             RadioButton rb = sender as RadioButton;
@@ -106,26 +106,49 @@ namespace Restaurantservice
 
             // Tomorrow
             DateTime nextDeliveryDate = DateTime.Now;
-            int dayOfWeek = (int)nextDeliveryDate.DayOfWeek;
-
-            int tomorrow = dayOfWeek++;
-
-            if (dayOfWeek == 5)
-            {
-                nextDeliveryDate = nextDeliveryDate.AddDays(3);
-            }
-            else if (tomorrow == 6)
-            {
-                nextDeliveryDate = nextDeliveryDate.AddDays(2);
-            }
-            else 
-            {
-                nextDeliveryDate = nextDeliveryDate.AddDays(1);
-            }
-
+            nextDeliveryDate = nextDeliveryDate.AddDays(1);
             CreateLabels(nextDeliveryDate.ToShortDateString(), true);
+
+            #region Three days forward
+            //int dayOfWeek = (int)nextDeliveryDate.DayOfWeek;
+
+            //int tomorrow = dayOfWeek++;
+
+            //if (dayOfWeek == 5)
+            //{
+            //    nextDeliveryDate = nextDeliveryDate.AddDays(3);
+            //}
+            //else if (tomorrow == 6)
+            //{
+            //    nextDeliveryDate = nextDeliveryDate.AddDays(2);
+            //}
+            //else 
+            //{
+            //    nextDeliveryDate = nextDeliveryDate.AddDays(1);
+            //}
+
+            //CreateLabels(nextDeliveryDate.ToShortDateString(), true);
+            #endregion
+        }
+        private void btnCreateInvoices_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Ingen funktionalitet utvecklad för denna knapp än.");
         }
 
+        private void btnAdminPassWord_Click(object sender, EventArgs e)
+        {
+            if (tbxAdminPassWord.Text == "niklas")
+            {
+                rbnRealDatabase.Enabled = true;
+                rbnTestDataBase.Enabled = true;
+            }
+            else
+            {
+                MessageBox.Show("Fel lösenord");
+            }
+        }
+        #endregion
+        #region Methods
         private void CreateTentativeOrders(DateTime deliveryDate)
         {
             string dateAsString = deliveryDate.ToShortDateString();
@@ -140,7 +163,6 @@ namespace Restaurantservice
 
                 PdfCreator.CreateTentativeOrders(tentativeOrders, deliveryDate);
                 MessageBox.Show("Preliminära beställningar skapade!");
-
             }
 
         }
@@ -181,7 +203,7 @@ namespace Restaurantservice
                 }
             }
         }
-
+        #endregion
 
         // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
@@ -220,23 +242,7 @@ namespace Restaurantservice
 
         #endregion
 
-        private void btnCreateInvoices_Click(object sender, EventArgs e)
-        {
-            MessageBox.Show("Ingen funktionalitet utvecklad för denna knapp än.");
-        }
-
-        private void btnAdminPassWord_Click(object sender, EventArgs e)
-        {
-            if (tbxAdminPassWord.Text == "niklas")
-            {
-                rbnRealDatabase.Enabled = true;
-                rbnTestDataBase.Enabled = true;
-            }
-            else
-            {
-                MessageBox.Show("Fel lösenord");
-            }
-        }
+        
 
 
 
