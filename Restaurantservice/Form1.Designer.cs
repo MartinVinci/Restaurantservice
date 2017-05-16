@@ -40,16 +40,24 @@
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.btnCreateInvoices = new System.Windows.Forms.Button();
             this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.lblVersion = new System.Windows.Forms.Label();
             this.rbnRealDatabase = new System.Windows.Forms.RadioButton();
             this.rbnTestDataBase = new System.Windows.Forms.RadioButton();
             this.tbxAdminPassWord = new System.Windows.Forms.TextBox();
             this.btnAdminPassWord = new System.Windows.Forms.Button();
-            this.lblVersion = new System.Windows.Forms.Label();
+            this.rbnPickupMobilia = new System.Windows.Forms.RadioButton();
+            this.rbnPickupJagersro = new System.Windows.Forms.RadioButton();
+            this.rbnPrelPickupMobilia = new System.Windows.Forms.RadioButton();
+            this.rbnPrelPickupJägersro = new System.Windows.Forms.RadioButton();
+            this.pnlPrelDate = new System.Windows.Forms.Panel();
+            this.pnlPrelPickupRest = new System.Windows.Forms.Panel();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.tabPage3.SuspendLayout();
             this.tabPage4.SuspendLayout();
+            this.pnlPrelDate.SuspendLayout();
+            this.pnlPrelPickupRest.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -67,6 +75,8 @@
             // tabPage1
             // 
             this.tabPage1.BackColor = System.Drawing.Color.LightGray;
+            this.tabPage1.Controls.Add(this.rbnPickupJagersro);
+            this.tabPage1.Controls.Add(this.rbnPickupMobilia);
             this.tabPage1.Controls.Add(this.label1);
             this.tabPage1.Controls.Add(this.btnCreateLabels);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
@@ -79,7 +89,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(55, 12);
+            this.label1.Location = new System.Drawing.Point(25, 16);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(215, 52);
             this.label1.TabIndex = 2;
@@ -88,7 +98,7 @@
             // 
             // btnCreateLabels
             // 
-            this.btnCreateLabels.Location = new System.Drawing.Point(58, 90);
+            this.btnCreateLabels.Location = new System.Drawing.Point(28, 86);
             this.btnCreateLabels.Name = "btnCreateLabels";
             this.btnCreateLabels.Size = new System.Drawing.Size(212, 85);
             this.btnCreateLabels.TabIndex = 1;
@@ -100,9 +110,9 @@
             // 
             this.tabPage2.BackColor = System.Drawing.Color.PaleGreen;
             this.tabPage2.Controls.Add(this.dtpDateTimePicker);
-            this.tabPage2.Controls.Add(this.rbnTodaysDate);
-            this.tabPage2.Controls.Add(this.rbnPickDate);
             this.tabPage2.Controls.Add(this.btnTentativeOrders);
+            this.tabPage2.Controls.Add(this.pnlPrelDate);
+            this.tabPage2.Controls.Add(this.pnlPrelPickupRest);
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
@@ -112,7 +122,7 @@
             // 
             // dtpDateTimePicker
             // 
-            this.dtpDateTimePicker.Location = new System.Drawing.Point(59, 21);
+            this.dtpDateTimePicker.Location = new System.Drawing.Point(59, 6);
             this.dtpDateTimePicker.Name = "dtpDateTimePicker";
             this.dtpDateTimePicker.Size = new System.Drawing.Size(157, 20);
             this.dtpDateTimePicker.TabIndex = 8;
@@ -120,7 +130,7 @@
             // rbnTodaysDate
             // 
             this.rbnTodaysDate.AutoSize = true;
-            this.rbnTodaysDate.Location = new System.Drawing.Point(59, 71);
+            this.rbnTodaysDate.Location = new System.Drawing.Point(17, 36);
             this.rbnTodaysDate.Name = "rbnTodaysDate";
             this.rbnTodaysDate.Size = new System.Drawing.Size(132, 17);
             this.rbnTodaysDate.TabIndex = 7;
@@ -132,7 +142,7 @@
             // rbnPickDate
             // 
             this.rbnPickDate.AutoSize = true;
-            this.rbnPickDate.Location = new System.Drawing.Point(59, 47);
+            this.rbnPickDate.Location = new System.Drawing.Point(17, 13);
             this.rbnPickDate.Name = "rbnPickDate";
             this.rbnPickDate.Size = new System.Drawing.Size(116, 17);
             this.rbnPickDate.TabIndex = 6;
@@ -143,9 +153,9 @@
             // 
             // btnTentativeOrders
             // 
-            this.btnTentativeOrders.Location = new System.Drawing.Point(59, 94);
+            this.btnTentativeOrders.Location = new System.Drawing.Point(59, 118);
             this.btnTentativeOrders.Name = "btnTentativeOrders";
-            this.btnTentativeOrders.Size = new System.Drawing.Size(157, 85);
+            this.btnTentativeOrders.Size = new System.Drawing.Size(157, 61);
             this.btnTentativeOrders.TabIndex = 5;
             this.btnTentativeOrders.Text = "Tag fram preliminära beställningar";
             this.btnTentativeOrders.UseVisualStyleBackColor = true;
@@ -184,6 +194,15 @@
             this.tabPage4.Size = new System.Drawing.Size(379, 204);
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "Administratörssida";
+            // 
+            // lblVersion
+            // 
+            this.lblVersion.AutoSize = true;
+            this.lblVersion.Location = new System.Drawing.Point(3, 181);
+            this.lblVersion.Name = "lblVersion";
+            this.lblVersion.Size = new System.Drawing.Size(42, 13);
+            this.lblVersion.TabIndex = 4;
+            this.lblVersion.Text = "Version";
             // 
             // rbnRealDatabase
             // 
@@ -226,14 +245,67 @@
             this.btnAdminPassWord.UseVisualStyleBackColor = true;
             this.btnAdminPassWord.Click += new System.EventHandler(this.btnAdminPassWord_Click);
             // 
-            // lblVersion
+            // rbnPickupMobilia
             // 
-            this.lblVersion.AutoSize = true;
-            this.lblVersion.Location = new System.Drawing.Point(3, 181);
-            this.lblVersion.Name = "lblVersion";
-            this.lblVersion.Size = new System.Drawing.Size(42, 13);
-            this.lblVersion.TabIndex = 4;
-            this.lblVersion.Text = "Version";
+            this.rbnPickupMobilia.AutoSize = true;
+            this.rbnPickupMobilia.Location = new System.Drawing.Point(262, 86);
+            this.rbnPickupMobilia.Name = "rbnPickupMobilia";
+            this.rbnPickupMobilia.Size = new System.Drawing.Size(58, 17);
+            this.rbnPickupMobilia.TabIndex = 3;
+            this.rbnPickupMobilia.TabStop = true;
+            this.rbnPickupMobilia.Text = "Mobilia";
+            this.rbnPickupMobilia.UseVisualStyleBackColor = true;
+            // 
+            // rbnPickupJagersro
+            // 
+            this.rbnPickupJagersro.AutoSize = true;
+            this.rbnPickupJagersro.Location = new System.Drawing.Point(262, 110);
+            this.rbnPickupJagersro.Name = "rbnPickupJagersro";
+            this.rbnPickupJagersro.Size = new System.Drawing.Size(65, 17);
+            this.rbnPickupJagersro.TabIndex = 4;
+            this.rbnPickupJagersro.TabStop = true;
+            this.rbnPickupJagersro.Text = "Jägersro";
+            this.rbnPickupJagersro.UseVisualStyleBackColor = true;
+            // 
+            // rbnPrelPickupMobilia
+            // 
+            this.rbnPrelPickupMobilia.AutoSize = true;
+            this.rbnPrelPickupMobilia.Location = new System.Drawing.Point(12, 47);
+            this.rbnPrelPickupMobilia.Name = "rbnPrelPickupMobilia";
+            this.rbnPrelPickupMobilia.Size = new System.Drawing.Size(58, 17);
+            this.rbnPrelPickupMobilia.TabIndex = 9;
+            this.rbnPrelPickupMobilia.TabStop = true;
+            this.rbnPrelPickupMobilia.Text = "Mobilia";
+            this.rbnPrelPickupMobilia.UseVisualStyleBackColor = true;
+            // 
+            // rbnPrelPickupJägersro
+            // 
+            this.rbnPrelPickupJägersro.AutoSize = true;
+            this.rbnPrelPickupJägersro.Location = new System.Drawing.Point(12, 69);
+            this.rbnPrelPickupJägersro.Name = "rbnPrelPickupJägersro";
+            this.rbnPrelPickupJägersro.Size = new System.Drawing.Size(65, 17);
+            this.rbnPrelPickupJägersro.TabIndex = 10;
+            this.rbnPrelPickupJägersro.TabStop = true;
+            this.rbnPrelPickupJägersro.Text = "Jägersro";
+            this.rbnPrelPickupJägersro.UseVisualStyleBackColor = true;
+            // 
+            // pnlPrelDate
+            // 
+            this.pnlPrelDate.Controls.Add(this.rbnPickDate);
+            this.pnlPrelDate.Controls.Add(this.rbnTodaysDate);
+            this.pnlPrelDate.Location = new System.Drawing.Point(42, 35);
+            this.pnlPrelDate.Name = "pnlPrelDate";
+            this.pnlPrelDate.Size = new System.Drawing.Size(174, 64);
+            this.pnlPrelDate.TabIndex = 11;
+            // 
+            // pnlPrelPickupRest
+            // 
+            this.pnlPrelPickupRest.Controls.Add(this.rbnPrelPickupJägersro);
+            this.pnlPrelPickupRest.Controls.Add(this.rbnPrelPickupMobilia);
+            this.pnlPrelPickupRest.Location = new System.Drawing.Point(241, 71);
+            this.pnlPrelPickupRest.Name = "pnlPrelPickupRest";
+            this.pnlPrelPickupRest.Size = new System.Drawing.Size(99, 108);
+            this.pnlPrelPickupRest.TabIndex = 12;
             // 
             // Form1
             // 
@@ -247,10 +319,13 @@
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
             this.tabPage2.ResumeLayout(false);
-            this.tabPage2.PerformLayout();
             this.tabPage3.ResumeLayout(false);
             this.tabPage4.ResumeLayout(false);
             this.tabPage4.PerformLayout();
+            this.pnlPrelDate.ResumeLayout(false);
+            this.pnlPrelDate.PerformLayout();
+            this.pnlPrelPickupRest.ResumeLayout(false);
+            this.pnlPrelPickupRest.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -274,6 +349,12 @@
         private System.Windows.Forms.TextBox tbxAdminPassWord;
         private System.Windows.Forms.Button btnAdminPassWord;
         private System.Windows.Forms.Label lblVersion;
+        private System.Windows.Forms.RadioButton rbnPickupJagersro;
+        private System.Windows.Forms.RadioButton rbnPickupMobilia;
+        private System.Windows.Forms.RadioButton rbnPrelPickupJägersro;
+        private System.Windows.Forms.RadioButton rbnPrelPickupMobilia;
+        private System.Windows.Forms.Panel pnlPrelDate;
+        private System.Windows.Forms.Panel pnlPrelPickupRest;
     }
 }
 

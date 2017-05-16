@@ -22,6 +22,9 @@ namespace Restaurantservice
         public static string DATABASETEST = "BRADGARD_NU";
         public static string DATABASELIVE = "KNIVOCHGAFFEL";
 
+        public static string PICKUP_MOBILIA = "mobilia";
+        public static string PICKUP_JAGERSRO = "jägersro";
+
         public static string DataBaseVersion = "";
         public Form1()
         {
@@ -35,7 +38,7 @@ namespace Restaurantservice
             rbnRealDatabase.Checked = true;
             rbnRealDatabase.Enabled = false;
             rbnTestDataBase.Enabled = false;
-            lblVersion.Text = "Version: 1.0 - 17-05-03";
+            lblVersion.Text = "Version: 1.2 - 17-05-16";
 
             DataBaseVersion = DATABASELIVE;
 
@@ -89,25 +92,59 @@ namespace Restaurantservice
         }
         private void btnTentativeOrders_Click(object sender, EventArgs e)
         {
-            if (rbnTodaysDate.Checked == true)
+            string pickupRest = "";
+            if (rbnPrelPickupMobilia.Checked == true)
             {
-                CreateTentativeOrders(DateTime.Now);
+                pickupRest = PICKUP_MOBILIA;
             }
-            else if (rbnPickDate.Checked == true)
+            else if (rbnPrelPickupJägersro.Checked == true)
             {
-                CreateTentativeOrders(dtpDateTimePicker.Value);
+                pickupRest = PICKUP_JAGERSRO;
+            }
+
+            if (pickupRest == "")
+            {
+                MessageBox.Show("Du har inte valt någon restaurang.");
+            }
+            else
+            {
+                if (rbnTodaysDate.Checked == true)
+                {
+                    CreateTentativeOrders(DateTime.Now, pickupRest);
+                }
+                else if (rbnPickDate.Checked == true)
+                {
+                    CreateTentativeOrders(dtpDateTimePicker.Value, pickupRest);
+                }
             }
         }
 
         private void btnCreateLabels_Click(object sender, EventArgs e)
         {
-            // Today
-            CreateLabels(DateTime.Now.ToShortDateString(), false);
+            string pickupRest = "";
+            if (rbnPickupMobilia.Checked == true)
+            {
+                pickupRest = PICKUP_MOBILIA;
+            }
+            else if (rbnPickupJagersro.Checked == true)
+            {
+                pickupRest = PICKUP_JAGERSRO;
+            }
 
-            // Tomorrow
-            DateTime nextDeliveryDate = DateTime.Now;
-            nextDeliveryDate = nextDeliveryDate.AddDays(1);
-            CreateLabels(nextDeliveryDate.ToShortDateString(), true);
+            if (pickupRest == "")
+            {
+                MessageBox.Show("Du har inte valt någon restaurang.");
+            }
+            else
+            {
+                // Today
+                CreateLabels(DateTime.Now.ToShortDateString(), false, pickupRest);
+
+                // Tomorrow
+                DateTime nextDeliveryDate = DateTime.Now;
+                nextDeliveryDate = nextDeliveryDate.AddDays(1);
+                CreateLabels(nextDeliveryDate.ToShortDateString(), true, pickupRest);
+            }
 
             #region Three days forward
             //int dayOfWeek = (int)nextDeliveryDate.DayOfWeek;
@@ -149,10 +186,10 @@ namespace Restaurantservice
         }
         #endregion
         #region Methods
-        private void CreateTentativeOrders(DateTime deliveryDate)
+        private void CreateTentativeOrders(DateTime deliveryDate, string pickupRest)
         {
             string dateAsString = deliveryDate.ToShortDateString();
-            List<Order> orders = DataAccess.GetTodaysOrders(dateAsString);
+            List<Order> orders = DataAccess.GetTodaysOrders(dateAsString, pickupRest);
             if (orders.Count == 0)
             {
                 MessageBox.Show("Inga beställningar hittade");
@@ -161,7 +198,7 @@ namespace Restaurantservice
             {
                 List<TentativeOrder> tentativeOrders = GetTentativeOrders(orders);
 
-                PdfCreator.CreateTentativeOrders(tentativeOrders, deliveryDate);
+                PdfCreator.CreateTentativeOrders(tentativeOrders, deliveryDate, pickupRest);
                 MessageBox.Show("Preliminära beställningar skapade!");
             }
 
@@ -185,13 +222,16 @@ namespace Restaurantservice
 
             return tentativeOrders;
         }
-        private void CreateLabels(string date, bool tomorrow)
+        private void CreateLabels(string date, bool tomorrow, string pickupRest)
         {
-            List<Order> orders = DataAccess.GetTodaysOrders(date);
+            List<Order> orders = DataAccess.GetTodaysOrders(date, pickupRest);
 
             if (orders.Count == 0)
             {
-                MessageBox.Show("Inga beställningar hittade");
+                if (tomorrow == false)
+                {
+                    MessageBox.Show("Inga beställningar hittade");
+                }
             }
             else
             {
@@ -242,7 +282,7 @@ namespace Restaurantservice
 
         #endregion
 
-        
+
 
 
 

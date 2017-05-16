@@ -17,7 +17,7 @@ namespace Restaurantservice
 
         #region Tentative Orders
 
-        public static void CreateTentativeOrders(List<TentativeOrder> orders, DateTime deliveryDate)
+        public static void CreateTentativeOrders(List<TentativeOrder> orders, DateTime deliveryDate, string pickupRestaurant)
         {
             // Initial set up for page
             PdfDocument pdf = new PdfDocument();
@@ -30,7 +30,7 @@ namespace Restaurantservice
             XGraphics graph = XGraphics.FromPdfPage(pdfPage);
 
             // Write initial information
-            string prelText = string.Format("Preliminära beställningar för: {0}.", deliveryDate.ToShortDateString());
+            string prelText = string.Format("Preliminära beställningar för: {0}, {1}.", pickupRestaurant, deliveryDate.ToShortDateString());
             graph.DrawString(prelText, fontName, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), 35, 30, XStringFormats.TopLeft);
             
             string lookupText = string.Format("Informationen hämtad från databas: {0}.", DateTime.Now);
@@ -102,8 +102,8 @@ namespace Restaurantservice
 
             #endregion
 
-            // Sort by delivery address. 
-            orders = orders.OrderBy(o => o.Addr).ToList();
+            // Sort by delivery address, then by dish
+            orders = orders.OrderBy(o => o.Addr).ThenBy(o => o.Dish).ToList();
 
             // Initial set up for page
             PdfDocument pdf = new PdfDocument();
