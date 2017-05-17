@@ -17,45 +17,67 @@ namespace Restaurantservice
 
         #region Tentative Orders
 
-        public static void CreateTentativeOrders(List<TentativeOrder> orders, DateTime deliveryDate, string pickupRestaurant)
+        private static int SpaceBeforeHeader()
         {
-            // Initial set up for page
+            return 15;
+        }
+
+        private static int SpaceAfterText()
+        {
+            return 20;
+        }
+
+        public static void CreateTentativeOrders(List<TentativeOrderList> orderLists, DateTime deliveryDate, string pickupRestaurant)
+        {
             PdfDocument pdf = new PdfDocument();
             pdf.Info.Title = "Preliminära beställningar " + deliveryDate.ToShortDateString();
             PdfPage pdfPage = pdf.AddPage();
 
-            XFont fontName = new XFont("Times New Roman", 20, XFontStyle.Regular);
-            XFont fontOther = new XFont("Times New Roman", 10, XFontStyle.Regular);
+            XFont fontBig = new XFont("Times New Roman", 20, XFontStyle.Regular);
+            XFont fontMedium = new XFont("Times New Roman", 16, XFontStyle.Regular);
+            XFont fontSmall = new XFont("Times New Roman", 12, XFontStyle.Regular);
 
             XGraphics graph = XGraphics.FromPdfPage(pdfPage);
 
             // Write initial information
             string prelText = string.Format("Preliminära beställningar för: {0}, {1}.", pickupRestaurant, deliveryDate.ToShortDateString());
-            graph.DrawString(prelText, fontName, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), 35, 30, XStringFormats.TopLeft);
-            
+            graph.DrawString(prelText, fontBig, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), 35, 30, XStringFormats.TopLeft);
+
             string lookupText = string.Format("Informationen hämtad från databas: {0}.", DateTime.Now);
-            graph.DrawString(lookupText, fontOther, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), 35, 60, XStringFormats.TopLeft);
+            graph.DrawString(lookupText, fontMedium, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), 35, 60, XStringFormats.TopLeft);
 
             // Set beginning coordinates
             int nameXCoord = 40;
             int nameYCoord = 90;
-            int quantityXCoord = 500;
+            int quantityXCoord = 300;
             int quantityYCoord = 90;
 
-            if (orders.Count > 0)
+            foreach (var orderList in orderLists)
             {
-                foreach (var item in orders)
-                {
-                    graph.DrawString(item.DishName, fontName, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), nameXCoord, nameYCoord, XStringFormats.TopLeft);
-                    graph.DrawString(item.Quantity.ToString(), fontName, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), quantityXCoord, quantityYCoord, XStringFormats.TopLeft);
+                nameYCoord += SpaceBeforeHeader();
+                quantityYCoord += SpaceBeforeHeader();
 
-                    nameYCoord += 35;
-                    quantityYCoord += 35;
+                graph.DrawString(orderList.KgPortalUser, fontMedium, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), nameXCoord, nameYCoord, XStringFormats.TopLeft);
+                nameYCoord += SpaceAfterText();
+                quantityYCoord += SpaceAfterText();
+
+                if (orderList.OrderList.Count() > 0)
+                {
+                    foreach (var order in orderList.OrderList)
+                    {
+                        graph.DrawString(order.DishName, fontSmall, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), nameXCoord, nameYCoord, XStringFormats.TopLeft);
+                        graph.DrawString(order.Quantity.ToString(), fontSmall, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), quantityXCoord, quantityYCoord, XStringFormats.TopLeft);
+
+                        nameYCoord += SpaceAfterText();
+                        quantityYCoord += SpaceAfterText();
+                    }
                 }
-            }
-            else if (orders.Count == 0)
-            {
-                graph.DrawString("Det finns inga beställningar för denna dag.", fontName, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), nameXCoord, nameYCoord, XStringFormats.TopLeft);
+                else if (orderList.OrderList.Count() == 0)
+                {
+                    graph.DrawString("Det finns inga beställningar för denna dag.", fontSmall, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), nameXCoord, nameYCoord, XStringFormats.TopLeft);
+                    nameYCoord += SpaceAfterText();
+                    quantityYCoord += SpaceAfterText();
+                }
             }
 
             string filePath = GetFileNameAndPath(TYPE_TENTATIVE, false);
@@ -75,7 +97,7 @@ namespace Restaurantservice
             //orders.AddRange(orders2);
             //orders.AddRange(orders2);
 
-            #endregion  
+            #endregion
             #region TestOrders without using database
             //Order testLabel1 = new Order("Gunnel Nilsson", "Boef Bourguignon", "fredag 7/4", "Kyrkbyn", false);
             //Order testLabel2 = new Order("Gunnel Nilsson", "Lasagne", "fredag 7/4", "En lång adress någonstans", true);
@@ -122,7 +144,7 @@ namespace Restaurantservice
              * 78
              * 9 10   */
             int counterPlaceHolder = 0;
-            
+
             // Draw the text
             foreach (var order in orders)
             {
@@ -148,7 +170,7 @@ namespace Restaurantservice
                 Process.Start(filePath);
             }
         }
-        
+
         private static void DrawLabelOnPaper(XGraphics graph, Order label, XFont fontName, XFont fontOther, int position)
         {
             Coordinate coord;
@@ -158,7 +180,7 @@ namespace Restaurantservice
             int Xright = 440;
 
             // Startposition
-            int sp = 0; 
+            int sp = 0;
 
             switch (position)
             {

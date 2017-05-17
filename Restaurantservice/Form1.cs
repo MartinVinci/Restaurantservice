@@ -38,7 +38,7 @@ namespace Restaurantservice
             rbnRealDatabase.Checked = true;
             rbnRealDatabase.Enabled = false;
             rbnTestDataBase.Enabled = false;
-            lblVersion.Text = "Version: 1.2 - 17-05-16";
+            lblVersion.Text = "Version: 1.3 - 17-05-17";
 
             DataBaseVersion = DATABASELIVE;
 
@@ -196,9 +196,27 @@ namespace Restaurantservice
             }
             else
             {
-                List<TentativeOrder> tentativeOrders = GetTentativeOrders(orders);
+                List<string> addresses = (from o in orders
+                                          orderby o.Addr
+                                          select o.Addr).Distinct().ToList();
 
-                PdfCreator.CreateTentativeOrders(tentativeOrders, deliveryDate, pickupRest);
+                List<TentativeOrderList> listOfTentativeOrderList = new List<TentativeOrderList>();
+                foreach (var addr in addresses)
+                {
+                    List<Order> ordersForAddr = (from o in orders
+                                                 where o.Addr == addr
+                                                 select o).ToList();
+
+
+                    List<TentativeOrder> tentativeOrders = GetTentativeOrders(ordersForAddr);
+
+                    TentativeOrderList tentList = new TentativeOrderList(addr, tentativeOrders);
+
+                    listOfTentativeOrderList.Add(tentList);
+                }
+
+
+                PdfCreator.CreateTentativeOrders(listOfTentativeOrderList, deliveryDate, pickupRest);
                 MessageBox.Show("Preliminära beställningar skapade!");
             }
 
