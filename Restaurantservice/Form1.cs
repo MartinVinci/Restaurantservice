@@ -41,7 +41,6 @@ namespace Restaurantservice
             lblVersion.Text = "Version: 1.3 - 17-05-17";
 
             DataBaseVersion = DATABASELIVE;
-
         }
 
         #region Forms actions
@@ -170,6 +169,7 @@ namespace Restaurantservice
         private void btnCreateInvoices_Click(object sender, EventArgs e)
         {
             MessageBox.Show("Ingen funktionalitet utvecklad för denna knapp än.");
+            //CreateInvoiceCsvFile();
         }
 
         private void btnAdminPassWord_Click(object sender, EventArgs e)
@@ -185,7 +185,17 @@ namespace Restaurantservice
             }
         }
         #endregion
+
         #region Methods
+        private void CreateInvoiceCsvFile()
+        {
+            List<InvoiceDataRow> invoiceDataRows = DataAccess.GetInvoiceData();
+
+            bool success = TextFileCreator.CreateInvoices(invoiceDataRows);
+            
+
+        }
+
         private void CreateTentativeOrders(DateTime deliveryDate, string pickupRest)
         {
             string dateAsString = deliveryDate.ToShortDateString();

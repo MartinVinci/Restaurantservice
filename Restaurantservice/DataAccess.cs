@@ -13,14 +13,8 @@ namespace Restaurantservice
 {
     public class DataAccess
     {
-        public static List<Order> GetTodaysOrders(string deliveryDate, string pickupRestaurant)
+        private static MySqlConnection GetSqlConnection()
         {
-            //// Use this during development if you want to set at specific date.
-            //if (deliveryDate == "0")
-            //{
-            //    deliveryDate = "2017-04-15";
-            //}
-
             var conn = new MySqlConnection();
 
             string dataBaseVersion = Form1.DataBaseVersion.ToString();
@@ -35,7 +29,18 @@ namespace Restaurantservice
                 // Brädgård_nu
                 conn.ConnectionString = "server=mysql507.loopia.se; userid=wp_admin@b113010; password=mediakonsten99; database=bradgard_nu;";
             }
+            return conn;
+        }
 
+        public static List<Order> GetTodaysOrders(string deliveryDate, string pickupRestaurant)
+        {
+            //// Use this during development if you want to set at specific date.
+            //if (deliveryDate == "0")
+            //{
+            //    deliveryDate = "2017-04-15";
+            //}
+
+            MySqlConnection conn = GetSqlConnection();
 
             MySqlDataReader rdr = null;
 
@@ -46,16 +51,6 @@ namespace Restaurantservice
                 //conn = new MySqlConnection(cs);
                 conn.Open();
 
-
-                //deliveryDate = "2017-04-15";
-                //string query = "SELECT bru.firstname, bru.lastname, pro.product_name, ord.delivery_date, bru.delivery_street, ord.served_cold "
-                //    + "FROM kgportal_orders as ord "
-                //    + "INNER JOIN kgportal_brukare as bru ON ord.customer = bru.id "
-                //    + "INNER JOIN kgportal_products as pro ON ord.item_id = pro.id "
-                //    + "WHERE ord.delivery_date = '"
-                //    + deliveryDate
-                //    + "'";
-
                 string query = "SELECT bru.firstname, bru.lastname, pro.product_name, ord.delivery_date, bru.delivery_street, ord.served_cold, meta1.meta_value, meta2.meta_value " +
                                 "FROM kgportal_orders as ord " +
                                 "INNER JOIN kgportal_brukare as bru ON ord.customer = bru.id " +
@@ -64,7 +59,7 @@ namespace Restaurantservice
                                 "INNER JOIN kgportal_usermeta as meta2 ON bru.unit_id = meta2.user_id " +
                                 "WHERE meta1.meta_key = 'enhet' AND meta2.meta_key = 'restaurant' AND ord.delivery_date = '"
                                 + deliveryDate
-                                + "'"; 
+                                + "'";
 
                 MySqlCommand cmd = new MySqlCommand(query, conn);
                 rdr = cmd.ExecuteReader();
@@ -86,7 +81,6 @@ namespace Restaurantservice
                         orders.Add(order);
                     }
                 }
-
             }
             catch (MySqlException ex)
             {
@@ -103,64 +97,80 @@ namespace Restaurantservice
                 {
                     conn.Close();
                 }
-
             }
 
             return orders;
         }
-        //private void DoStuff2()
-        //{
-        //    //string conString = "server=mysql507.loopia.se; userid=wp_admin@b113010; password=mediakonstren99; database=bradgard_nu;";
 
-        //    //conn.ConnectionString = "server=mysql507.loopia.se; userid=wp_admin@b113010; password=mediakonstren99; database=bradgard_nu;";
+        public static List<InvoiceDataRow> GetInvoiceData()
+        {
+            MySqlConnection conn = GetSqlConnection();
 
+            MySqlDataReader rdr = null;
 
-        //    var conn = new MySqlConnection();
+            List<InvoiceDataRow> invoiceDataRows = new List<InvoiceDataRow>();
 
-        //    conn.ConnectionString = "server=mysql507.loopia.se; userid=wp_admin@b113010; password=mediakonsten99; database=bradgard_nu;";
-        //    //string cs = "server=mysql507.loopia.se; userid=wp_admin@b113010; password=mediakonstren99; database=bradgard_nu;";
+            try
+            {
+                conn.Open();
 
-        //    //MySqlConnection conn = null;
-        //    MySqlDataReader rdr = null;
-
-        //    try
-        //    {
-        //        //conn = new MySqlConnection(cs);
-        //        conn.Open();
-
-        //        string stm = "SELECT * FROM kgportal_orders";
-        //        MySqlCommand cmd = new MySqlCommand(stm, conn);
-        //        rdr = cmd.ExecuteReader();
-
-        //        while (rdr.Read())
-        //        {
-        //            var asdf = rdr.GetInt32(0) + " : "
-        //                + rdr.GetString(1) + " : "
-        //                + rdr.GetString(2);
-
-        //        }
-
-        //    }
-        //    catch (MySqlException ex)
-        //    {
-
-        //    }
-        //    finally
-        //    {
-        //        if (rdr != null)
-        //        {
-        //            rdr.Close();
-        //        }
-
-        //        if (conn != null)
-        //        {
-        //            conn.Close();
-        //        }
-
-        //    }
-        //}
+                string query = "SELECT bru.id, concat(bru.firstname, ' ', bru.lastname) as Namn, count(ord.item_id) as AntalRatter, pro.product_name, pro.price, bru.* "
+                        + "FROM `kgportal_orders` as ord "
+                        + "INNER JOIN `kgportal_products` as pro "
+                        + "ON pro.id = ord.item_id "
+                        + "INNER JOIN `kgportal_brukare` as bru "
+                        + "ON ord.customer = bru.id "
+                        + "WHERE ord.delivery_date >= '2017-04-16' "
+                        + "AND ord.delivery_date <= '2017-05-15' "
+                        + "GROUP BY ord.item_id, bru.id "
+                        + "ORDER BY bru.id ";
 
 
+                MySqlCommand cmd = new MySqlCommand(query, conn);
+                rdr = cmd.ExecuteReader();
+
+                // TODO remove counter
+                int counter = 0;
+
+                while (rdr.Read())
+                {
+                    counter++;
+
+                    string id = rdr.GetString(0);
+                    string name = rdr.GetString(1);
+                    int amount = rdr.GetInt32(2);
+                    string dish = rdr.GetString(3);
+                    int price = rdr.GetInt32(4);
+
+                    InvoiceDataRow row = new InvoiceDataRow(id, name, amount, dish, price);
+
+                    invoiceDataRows.Add(row);
+                    
+                    if (counter == 3)
+                    {
+                        break;
+                    }
+                }
+            }
+            catch (MySqlException ex)
+            {
+                System.Windows.Forms.MessageBox.Show(ex.ToString());
+            }
+            finally
+            {
+                if (rdr != null)
+                {
+                    rdr.Close();
+                }
+
+                if (conn != null)
+                {
+                    conn.Close();
+                }
+            }
+
+            return invoiceDataRows;
+        }
 
     }
 }
