@@ -27,6 +27,18 @@ namespace Restaurantservice
             return 20;
         }
 
+        private static XGraphics AddPdfPage(PdfDocument pdf, XGraphics graph)
+        {
+            var newPage = pdf.AddPage();
+            graph.Dispose();
+            return XGraphics.FromPdfPage(newPage);
+        }
+
+        private static bool TimeToAddNewPdfPage(int yCoord)
+        {
+            return yCoord > 750 ? true : false;
+        }
+
         public static void CreateTentativeOrders(List<TentativeOrderList> orderLists, DateTime deliveryDate, string pickupRestaurant)
         {
             PdfDocument pdf = new PdfDocument();
@@ -52,12 +64,28 @@ namespace Restaurantservice
             int quantityXCoord = 300;
             int quantityYCoord = 90;
 
+            int pageCounter = 1;
+
             foreach (var orderList in orderLists)
             {
                 nameYCoord += SpaceBeforeHeader();
                 quantityYCoord += SpaceBeforeHeader();
 
+                if (TimeToAddNewPdfPage(nameYCoord))
+                {
+                    graph = AddPdfPage(pdf, graph);
+
+                    pageCounter++;
+                    graph.DrawString(string.Format("Sida: {0}", pageCounter), fontBig, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), 35, 30, XStringFormats.TopLeft);
+
+                    nameXCoord = 40;
+                    nameYCoord = 90;
+                    quantityXCoord = 300;
+                    quantityYCoord = 90;
+                }
+
                 graph.DrawString(orderList.KgPortalUser, fontMedium, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), nameXCoord, nameYCoord, XStringFormats.TopLeft);
+
                 nameYCoord += SpaceAfterText();
                 quantityYCoord += SpaceAfterText();
 
@@ -65,6 +93,19 @@ namespace Restaurantservice
                 {
                     foreach (var order in orderList.OrderList)
                     {
+                        if (TimeToAddNewPdfPage(nameYCoord))
+                        {
+                            graph = AddPdfPage(pdf, graph);
+
+                            pageCounter++;
+                            graph.DrawString(string.Format("Sida: {0}", pageCounter), fontBig, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), 35, 30, XStringFormats.TopLeft);
+
+                            nameXCoord = 40;
+                            nameYCoord = 90;
+                            quantityXCoord = 300;
+                            quantityYCoord = 90;
+                        }
+
                         graph.DrawString(order.DishName, fontSmall, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), nameXCoord, nameYCoord, XStringFormats.TopLeft);
                         graph.DrawString(order.Quantity.ToString(), fontSmall, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), quantityXCoord, quantityYCoord, XStringFormats.TopLeft);
 
@@ -123,6 +164,15 @@ namespace Restaurantservice
             //DrawLabelOnPaper(graph, testLabel10, fontName, fontOther, 10);
 
             #endregion
+
+            // Add ¤¤¤ sign if brukare needs help with eating
+            foreach (var order in orders)
+            {
+                if (order.SpecialPackaging)
+                {
+                    order.Addr += " ¤¤¤";
+                }
+            }
 
             // Sort by delivery address, then by dish
             orders = orders.OrderBy(o => o.Addr).ThenBy(o => o.Dish).ToList();

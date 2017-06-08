@@ -30,6 +30,14 @@ namespace Restaurantservice
         {
             InitializeComponent();
             CustomInitialize();
+           // DevelopmentInitialize(); // TODO remove at release
+        }
+        private void DevelopmentInitialize()
+        {
+            //DataBaseVersion = DATABASETEST;
+
+            //CreateTentativeOrders(DateTime.Now, PICKUP_JAGERSRO);
+
         }
         private void CustomInitialize()
         {
@@ -38,7 +46,7 @@ namespace Restaurantservice
             rbnRealDatabase.Checked = true;
             rbnRealDatabase.Enabled = false;
             rbnTestDataBase.Enabled = false;
-            lblVersion.Text = "Version: 1.3 - 17-05-17";
+            lblVersion.Text = "Version: 1.4 - 17-06-08";
 
             DataBaseVersion = DATABASELIVE;
         }
@@ -192,28 +200,28 @@ namespace Restaurantservice
             List<InvoiceDataRow> invoiceDataRows = DataAccess.GetInvoiceData();
 
             bool success = TextFileCreator.CreateInvoices(invoiceDataRows);
-            
+
 
         }
 
         private void CreateTentativeOrders(DateTime deliveryDate, string pickupRest)
         {
             string dateAsString = deliveryDate.ToShortDateString();
-            List<Order> orders = DataAccess.GetTodaysOrders(dateAsString, pickupRest);
-            if (orders.Count == 0)
+            List<Order> allOrdersFromDB = DataAccess.GetTodaysOrders(dateAsString, pickupRest);
+            if (allOrdersFromDB.Count == 0)
             {
                 MessageBox.Show("Inga beställningar hittade");
             }
             else
             {
-                List<string> addresses = (from o in orders
+                List<string> addresses = (from o in allOrdersFromDB
                                           orderby o.Addr
                                           select o.Addr).Distinct().ToList();
 
                 List<TentativeOrderList> listOfTentativeOrderList = new List<TentativeOrderList>();
                 foreach (var addr in addresses)
                 {
-                    List<Order> ordersForAddr = (from o in orders
+                    List<Order> ordersForAddr = (from o in allOrdersFromDB
                                                  where o.Addr == addr
                                                  select o).ToList();
 
@@ -224,13 +232,17 @@ namespace Restaurantservice
 
                     listOfTentativeOrderList.Add(tentList);
                 }
-
+                
+                // Add total tentative orders to print after everything else
+                var allTentativeOrders = GetTentativeOrders(allOrdersFromDB);
+                TentativeOrderList tentListTotal = new TentativeOrderList("- - Totalt - - ", allTentativeOrders);
+                listOfTentativeOrderList.Add(tentListTotal);
 
                 PdfCreator.CreateTentativeOrders(listOfTentativeOrderList, deliveryDate, pickupRest);
                 MessageBox.Show("Preliminära beställningar skapade!");
             }
-
         }
+
         private List<TentativeOrder> GetTentativeOrders(List<Order> orders)
         {
             List<string> uniqueDishes = (from o in orders

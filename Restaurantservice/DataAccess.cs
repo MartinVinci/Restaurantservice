@@ -34,11 +34,8 @@ namespace Restaurantservice
 
         public static List<Order> GetTodaysOrders(string deliveryDate, string pickupRestaurant)
         {
-            //// Use this during development if you want to set at specific date.
-            //if (deliveryDate == "0")
-            //{
-            //    deliveryDate = "2017-04-15";
-            //}
+            // use this during development if you want to set at specific date.
+            //deliveryDate = "2017-06-01";
 
             MySqlConnection conn = GetSqlConnection();
 
@@ -51,7 +48,7 @@ namespace Restaurantservice
                 //conn = new MySqlConnection(cs);
                 conn.Open();
 
-                string query = "SELECT bru.firstname, bru.lastname, pro.product_name, ord.delivery_date, bru.delivery_street, ord.served_cold, meta1.meta_value, meta2.meta_value " +
+                string query = "SELECT bru.firstname, bru.lastname, pro.product_name, ord.delivery_date, bru.delivery_street, ord.served_cold, meta1.meta_value, meta2.meta_value, ord.special_packaging " +
                                 "FROM kgportal_orders as ord " +
                                 "INNER JOIN kgportal_brukare as bru ON ord.customer = bru.id " +
                                 "INNER JOIN kgportal_products as pro ON ord.item_id = pro.id " +
@@ -72,9 +69,10 @@ namespace Restaurantservice
                     string addr = rdr.GetString(6);
                     bool cold = rdr.GetBoolean(5);
                     string pickupRest = rdr.GetString(7);
+                    bool specialPackaging = rdr.GetBoolean(8);
 
                     date = date.Substring(0, 10);
-                    Order order = new Order(name, dish, date, addr, cold, pickupRest);
+                    Order order = new Order(name, dish, date, addr, cold, pickupRest, specialPackaging);
 
                     if (order.PickupRestaurant.ToLower() == pickupRestaurant)
                     {
@@ -129,13 +127,8 @@ namespace Restaurantservice
                 MySqlCommand cmd = new MySqlCommand(query, conn);
                 rdr = cmd.ExecuteReader();
 
-                // TODO remove counter
-                int counter = 0;
-
                 while (rdr.Read())
                 {
-                    counter++;
-
                     string id = rdr.GetString(0);
                     string name = rdr.GetString(1);
                     int amount = rdr.GetInt32(2);
@@ -145,11 +138,6 @@ namespace Restaurantservice
                     InvoiceDataRow row = new InvoiceDataRow(id, name, amount, dish, price);
 
                     invoiceDataRows.Add(row);
-                    
-                    if (counter == 3)
-                    {
-                        break;
-                    }
                 }
             }
             catch (MySqlException ex)

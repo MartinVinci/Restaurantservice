@@ -15,8 +15,9 @@ namespace Restaurantservice
         public string Logo { get; set; }
         public bool DeliverCold { get; set; }
         public string PickupRestaurant { get; set; }
+        public bool SpecialPackaging { get; set; }
 
-        public Order(string name, string dish, string date, string addr, bool deliverCold, string pickupRest)
+        public Order(string name, string dish, string date, string addr, bool deliverCold, string pickupRest, bool specialPackaging)
         {
             Name = name;
             Dish = dish;
@@ -25,6 +26,7 @@ namespace Restaurantservice
             Logo = @"C:\Bestallning\Logga\kniv-och-gaffel-logotyp-1.png";
             DeliverCold = deliverCold;
             PickupRestaurant = pickupRest;
+            SpecialPackaging = specialPackaging;
         }
     }
 }
