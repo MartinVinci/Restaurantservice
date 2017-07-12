@@ -13,6 +13,8 @@ namespace Restaurantservice
 {
     public class DataAccess
     {
+        public static string testString = "Commit";
+
         private static MySqlConnection GetSqlConnection()
         {
             var conn = new MySqlConnection();
