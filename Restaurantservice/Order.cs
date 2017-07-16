@@ -16,8 +16,11 @@ namespace Restaurantservice
         public bool DeliverCold { get; set; }
         public string PickupRestaurant { get; set; }
         public bool SpecialPackaging { get; set; }
+        public bool NoRice { get; set; }
+        public bool NoGluten { get; set; }
+        public int ProductGroup { get; set; }
 
-        public Order(string name, string dish, string date, string addr, bool deliverCold, string pickupRest, bool specialPackaging)
+        public Order(string name, string dish, string date, string addr, bool deliverCold, string pickupRest, bool specialPackaging, bool noRice, bool noGluten, int productGroup)
         {
             Name = name;
             Dish = dish;
@@ -27,6 +30,9 @@ namespace Restaurantservice
             DeliverCold = deliverCold;
             PickupRestaurant = pickupRest;
             SpecialPackaging = specialPackaging;
+            NoRice = noRice;
+            NoGluten = noGluten;
+            ProductGroup = productGroup;
         }
     }
 }

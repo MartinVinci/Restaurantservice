@@ -10,11 +10,13 @@ namespace Restaurantservice
     {
         public string KgPortalUser { get; set; }
         public List<TentativeOrder> OrderList { get; set; }
+        public int TotalDishCount { get; set; }
 
-        public TentativeOrderList(string kgPortalUser, List<TentativeOrder> orderList)
+        public TentativeOrderList(string kgPortalUser, List<TentativeOrder> orderList, int totalDishCount)
         {
             KgPortalUser = kgPortalUser;
             OrderList = orderList;
+            TotalDishCount = totalDishCount;
         }
     }
 }

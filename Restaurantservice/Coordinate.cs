@@ -18,10 +18,18 @@ namespace Restaurantservice
         public int AddrYcoord { get; set; }
         public int LogoXcoord { get; set; }
         public int LogoYcoord { get; set; }
+
         public int ColdXcoord { get; set; }
         public int ColdYcoord { get; set; }
+        public int SpecXcoord { get; set; }
+        public int SpecYcoord { get; set; }
+        public int RiceXcoord { get; set; }
+        public int RiceYcoord { get; set; }
+        public int GlutXcoord { get; set; }
+        public int GlutYcoord { get; set; }
 
-        public Coordinate(int nameX, int nameY, int dishX, int dishY, int dateX, int dateY, int addrX, int addrY, int logoX, int logoY, int coldX, int coldY)
+        public Coordinate(int nameX, int nameY, int dishX, int dishY, int dateX, int dateY, int addrX, int addrY, int logoX, int logoY, 
+            int coldX, int coldY, int specX, int specY, int riceX, int riceY, int glutX, int glutY)
         {
             NameXcoord = nameX;
             NameYcoord = nameY; 
@@ -35,6 +43,12 @@ namespace Restaurantservice
             LogoYcoord = logoY;
             ColdXcoord = coldX;
             ColdYcoord = coldY;
+            SpecXcoord = specX;
+            SpecYcoord = specY;
+            RiceXcoord = riceX;
+            RiceYcoord = riceY;
+            GlutXcoord = glutX;
+            GlutYcoord = glutY;
         }
     }
 }

@@ -3,6 +3,7 @@ using PdfSharp.Drawing.Layout;
 using PdfSharp.Pdf;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,8 @@ namespace Restaurantservice
     {
         private const string TYPE_TENTATIVE = "Tentative";
         private const string TYPE_LABEL = "Label";
+
+        private static bool showAppConfigErrorMessage = true;
 
         #region Tentative Orders
 
@@ -48,6 +51,7 @@ namespace Restaurantservice
             XFont fontBig = new XFont("Times New Roman", 20, XFontStyle.Regular);
             XFont fontMedium = new XFont("Times New Roman", 16, XFontStyle.Regular);
             XFont fontSmall = new XFont("Times New Roman", 12, XFontStyle.Regular);
+            XFont fontSmallBold = new XFont("Times New Roman", 12, XFontStyle.BoldItalic);
 
             XGraphics graph = XGraphics.FromPdfPage(pdfPage);
 
@@ -107,11 +111,18 @@ namespace Restaurantservice
                         }
 
                         graph.DrawString(order.DishName, fontSmall, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), nameXCoord, nameYCoord, XStringFormats.TopLeft);
-                        graph.DrawString(order.Quantity.ToString(), fontSmall, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), quantityXCoord, quantityYCoord, XStringFormats.TopLeft);
+
+                        string quantityPlusInfoText = order.Quantity.ToString() + order.InfoText;
+                        graph.DrawString(quantityPlusInfoText, fontSmall, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), quantityXCoord, quantityYCoord, XStringFormats.TopLeft);
 
                         nameYCoord += SpaceAfterText();
                         quantityYCoord += SpaceAfterText();
                     }
+                    graph.DrawString("Totalt antal luncher", fontSmallBold, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), nameXCoord, nameYCoord, XStringFormats.TopLeft);
+                    graph.DrawString(orderList.TotalDishCount.ToString(), fontSmallBold, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), quantityXCoord, quantityYCoord, XStringFormats.TopLeft);
+
+                    nameYCoord += SpaceAfterText();
+                    quantityYCoord += SpaceAfterText();
                 }
                 else if (orderList.OrderList.Count() == 0)
                 {
@@ -165,14 +176,14 @@ namespace Restaurantservice
 
             #endregion
 
-            // Add ¤¤¤ sign if brukare needs help with eating
-            foreach (var order in orders)
-            {
-                if (order.SpecialPackaging)
-                {
-                    order.Addr += " ¤¤¤";
-                }
-            }
+            //// Add ¤¤¤ sign if brukare needs help with eating
+            //foreach (var order in orders)
+            //{
+            //    if (order.SpecialPackaging)
+            //    {
+            //        order.Addr += " ¤¤¤";
+            //    }
+            //}
 
             // Sort by delivery address, then by dish
             orders = orders.OrderBy(o => o.Addr).ThenBy(o => o.Dish).ToList();
@@ -182,8 +193,9 @@ namespace Restaurantservice
             pdf.Info.Title = "Beställningar " + date;
             PdfPage pdfPage = pdf.AddPage();
 
-            XFont fontName = new XFont("Times New Roman", 20, XFontStyle.Regular);
-            XFont fontOther = new XFont("Times New Roman", 12, XFontStyle.Regular);
+            XFont fontBig = new XFont("Times New Roman", 20, XFontStyle.Regular);
+            XFont fontMedium = new XFont("Times New Roman", 12, XFontStyle.Regular);
+            XFont fontSmall = new XFont("Times New Roman", 10, XFontStyle.Regular);
             XGraphics graph = XGraphics.FromPdfPage(pdfPage);
 
 
@@ -195,11 +207,13 @@ namespace Restaurantservice
              * 9 10   */
             int counterPlaceHolder = 0;
 
+            showAppConfigErrorMessage = true;
+
             // Draw the text
             foreach (var order in orders)
             {
                 counterPlaceHolder++;
-                DrawLabelOnPaper(graph, order, fontName, fontOther, counterPlaceHolder);
+                DrawLabelOnPaper(graph, order, fontBig, fontMedium, fontSmall, counterPlaceHolder);
 
                 // Used when one paper is full
                 if (counterPlaceHolder == 10)
@@ -217,83 +231,224 @@ namespace Restaurantservice
 
             if (tomorrow == false)
             {
+                showAppConfigErrorMessage = true;
                 Process.Start(filePath);
             }
         }
 
-        private static void DrawLabelOnPaper(XGraphics graph, Order label, XFont fontName, XFont fontOther, int position)
+        //private static void DrawLabelOnPaperSaved(XGraphics graph, Order label, XFont fontName, XFont fontOther, int position)
+        //{
+        //    Coordinate coord;
+
+        //    // Left and right columns will have same X coordinates
+        //    int Xleft = 160;
+        //    int Xright = 440;
+
+        //    // Startposition
+        //    int sp = 0;
+
+        //    switch (position)
+        //    {
+        //        case 1:
+        //            sp = 45;
+        //            coord = new Coordinate(Xleft, sp, Xleft, sp + 18, Xleft, sp + 33, Xleft, sp + 48, Xleft, sp + 67, Xleft, sp + 120);
+        //            break;
+        //        case 2:
+        //            sp = 45;
+        //            coord = new Coordinate(Xright, sp, Xright, sp + 18, Xright, sp + 33, Xright, sp + 48, Xright, sp + 67, Xright, sp + 120);
+        //            break;
+        //        case 3:
+        //            sp = 205;
+        //            coord = new Coordinate(Xleft, sp, Xleft, sp + 18, Xleft, sp + 33, Xleft, sp + 48, Xleft, sp + 67, Xleft, sp + 120);
+        //            break;
+        //        case 4:
+        //            sp = 205;
+        //            coord = new Coordinate(Xright, sp, Xright, sp + 18, Xright, sp + 33, Xright, sp + 48, Xright, sp + 67, Xright, sp + 120);
+        //            break;
+        //        case 5:
+        //            sp = 365;
+        //            coord = new Coordinate(Xleft, sp, Xleft, sp + 18, Xleft, sp + 33, Xleft, sp + 48, Xleft, sp + 67, Xleft, sp + 120);
+        //            break;
+        //        case 6:
+        //            sp = 365;
+        //            coord = new Coordinate(Xright, sp, Xright, sp + 18, Xright, sp + 33, Xright, sp + 48, Xright, sp + 67, Xright, sp + 120);
+        //            break;
+        //        case 7:
+        //            sp = 530;
+        //            coord = new Coordinate(Xleft, sp, Xleft, sp + 18, Xleft, sp + 33, Xleft, sp + 48, Xleft, sp + 67, Xleft, sp + 120);
+        //            break;
+        //        case 8:
+        //            sp = 530;
+        //            coord = new Coordinate(Xright, sp, Xright, sp + 18, Xright, sp + 33, Xright, sp + 48, Xright, sp + 67, Xright, sp + 120);
+        //            break;
+        //        case 9:
+        //            sp = 690;
+        //            coord = new Coordinate(Xleft, sp, Xleft, sp + 18, Xleft, sp + 33, Xleft, sp + 48, Xleft, sp + 67, Xleft, sp + 120);
+        //            break;
+        //        case 10:
+        //            sp = 690;
+        //            coord = new Coordinate(Xright, sp, Xright, sp + 18, Xright, sp + 33, Xright, sp + 48, Xright, sp + 67, Xright, sp + 120);
+        //            break;
+        //        default:
+        //            coord = new Coordinate(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        //            break;
+        //    }
+
+        //    DrawLabelOnPaperByPosition(graph, label, fontName, fontOther, coord);
+        //}
+        //private static void DrawLabelOnPaperByPositionSaved(XGraphics graph, Order label, XFont fontName, XFont fontOther, Coordinate c)
+        //{
+        //    graph.DrawString(label.Name, fontName, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), c.NameXcoord, c.NameYcoord, XStringFormats.Center);
+        //    graph.DrawString(label.Dish, fontOther, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), c.DishXcoord, c.DishYcoord, XStringFormats.Center);
+        //    graph.DrawString(label.Date, fontOther, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), c.DateXcoord, c.DateYcoord, XStringFormats.Center);
+        //    graph.DrawString(label.Addr, fontOther, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), c.AddrXcoord, c.AddrYcoord, XStringFormats.Center);
+
+        //    graph.DrawImage(XImage.FromFile(label.Logo), c.LogoXcoord - 60, c.LogoYcoord);
+
+        //    if (label.DeliverCold)
+        //    {
+        //        graph.DrawString("Levereras kall", fontName, new XSolidBrush(XColor.FromCmyk(100, 33, 0, 0)), c.ColdXcoord, c.ColdYcoord, XStringFormats.Center);
+        //    }
+        //}
+
+        private static void DrawLabelOnPaper(XGraphics graph, Order label, XFont fontBig, XFont fontMedium, XFont fontSmall, int position)
         {
             Coordinate coord;
 
-            // Left and right columns will have same X coordinates
-            int Xleft = 160;
-            int Xright = 440;
+            // Read X coordinate adjustments from user
+            int manuallyAdjustLeftColumn = 0;
+            int manuallyAdjustRigthColumn = 0;
+
+            try
+            {
+                manuallyAdjustLeftColumn = Int32.Parse(ConfigurationManager.AppSettings["LeftColumnPosition"]);
+                manuallyAdjustRigthColumn = Int32.Parse(ConfigurationManager.AppSettings["RigthColumnPosition"]);
+            }
+            catch
+            {
+                if (showAppConfigErrorMessage != false)
+                {
+                    System.Windows.Forms.MessageBox.Show("Det kan hända att positioneringen av etiketterna inte är helt centrerad, kolla med Andreas eller Niklas om varför");
+                }
+
+                showAppConfigErrorMessage = false;
+            }
+            // Left and right columns will have same y coordinates
+
+            int Xleft = 160 + manuallyAdjustLeftColumn;
+            int Xright = 440 + manuallyAdjustRigthColumn;
 
             // Startposition
             int sp = 0;
+
+            int dish = 18;
+            int date = 33;
+            int addr = 48;
+
+            int cold = 63;
+            int spec = 63;
+            int rice = 78;
+            int glut = 78;
+
+            int logo = 93;
+
+            int adjDevLeft = 25;
+            int adjDevRight = 25;
 
             switch (position)
             {
                 case 1:
                     sp = 45;
-                    coord = new Coordinate(Xleft, sp, Xleft, sp + 18, Xleft, sp + 33, Xleft, sp + 48, Xleft, sp + 67, Xleft, sp + 120);
+                    coord = new Coordinate(Xleft, sp, Xleft, sp + dish, Xleft, sp + date, Xleft, sp + addr, Xleft, sp + logo,
+                        (Xleft - adjDevLeft), sp + cold, (Xleft + adjDevRight), sp + spec, (Xleft - adjDevLeft), sp + rice, (Xleft + adjDevRight), sp + glut);
                     break;
                 case 2:
                     sp = 45;
-                    coord = new Coordinate(Xright, sp, Xright, sp + 18, Xright, sp + 33, Xright, sp + 48, Xright, sp + 67, Xright, sp + 120);
+                    coord = new Coordinate(Xright, sp, Xright, sp + dish, Xright, sp + date, Xright, sp + addr, Xright, sp + logo,
+                        (Xright - adjDevLeft), sp + cold, (Xright + adjDevRight), sp + spec, (Xright - adjDevLeft), sp + rice, (Xright + adjDevRight), sp + glut);
                     break;
                 case 3:
                     sp = 205;
-                    coord = new Coordinate(Xleft, sp, Xleft, sp + 18, Xleft, sp + 33, Xleft, sp + 48, Xleft, sp + 67, Xleft, sp + 120);
+                    coord = new Coordinate(Xleft, sp, Xleft, sp + dish, Xleft, sp + date, Xleft, sp + addr, Xleft, sp + logo,
+                        (Xleft - adjDevLeft), sp + cold, (Xleft + adjDevRight), sp + spec, (Xleft - adjDevLeft), sp + rice, (Xleft + adjDevRight), sp + glut);
                     break;
                 case 4:
                     sp = 205;
-                    coord = new Coordinate(Xright, sp, Xright, sp + 18, Xright, sp + 33, Xright, sp + 48, Xright, sp + 67, Xright, sp + 120);
+                    coord = new Coordinate(Xright, sp, Xright, sp + dish, Xright, sp + date, Xright, sp + addr, Xright, sp + logo,
+                        (Xright - adjDevLeft), sp + cold, (Xright + adjDevRight), sp + spec, (Xright - adjDevLeft), sp + rice, (Xright + adjDevRight), sp + glut);
                     break;
                 case 5:
                     sp = 365;
-                    coord = new Coordinate(Xleft, sp, Xleft, sp + 18, Xleft, sp + 33, Xleft, sp + 48, Xleft, sp + 67, Xleft, sp + 120);
+                    coord = new Coordinate(Xleft, sp, Xleft, sp + dish, Xleft, sp + date, Xleft, sp + addr, Xleft, sp + logo,
+                        (Xleft - adjDevLeft), sp + cold, (Xleft + adjDevRight), sp + spec, (Xleft - adjDevLeft), sp + rice, (Xleft + adjDevRight), sp + glut);
                     break;
                 case 6:
                     sp = 365;
-                    coord = new Coordinate(Xright, sp, Xright, sp + 18, Xright, sp + 33, Xright, sp + 48, Xright, sp + 67, Xright, sp + 120);
+                    coord = new Coordinate(Xright, sp, Xright, sp + dish, Xright, sp + date, Xright, sp + addr, Xright, sp + logo,
+                        (Xright - adjDevLeft), sp + cold, (Xright + adjDevRight), sp + spec, (Xright - adjDevLeft), sp + rice, (Xright + adjDevRight), sp + glut);
                     break;
                 case 7:
                     sp = 530;
-                    coord = new Coordinate(Xleft, sp, Xleft, sp + 18, Xleft, sp + 33, Xleft, sp + 48, Xleft, sp + 67, Xleft, sp + 120);
+                    coord = new Coordinate(Xleft, sp, Xleft, sp + dish, Xleft, sp + date, Xleft, sp + addr, Xleft, sp + logo,
+                        (Xleft - adjDevLeft), sp + cold, (Xleft + adjDevRight), sp + spec, (Xleft - adjDevLeft), sp + rice, (Xleft + adjDevRight), sp + glut);
                     break;
                 case 8:
                     sp = 530;
-                    coord = new Coordinate(Xright, sp, Xright, sp + 18, Xright, sp + 33, Xright, sp + 48, Xright, sp + 67, Xright, sp + 120);
+                    coord = new Coordinate(Xright, sp, Xright, sp + dish, Xright, sp + date, Xright, sp + addr, Xright, sp + logo,
+                        (Xright - adjDevLeft), sp + cold, (Xright + adjDevRight), sp + spec, (Xright - adjDevLeft), sp + rice, (Xright + adjDevRight), sp + glut);
                     break;
                 case 9:
                     sp = 690;
-                    coord = new Coordinate(Xleft, sp, Xleft, sp + 18, Xleft, sp + 33, Xleft, sp + 48, Xleft, sp + 67, Xleft, sp + 120);
+                    coord = new Coordinate(Xleft, sp, Xleft, sp + dish, Xleft, sp + date, Xleft, sp + addr, Xleft, sp + logo,
+                        (Xleft - adjDevLeft), sp + cold, (Xleft + adjDevRight), sp + spec, (Xleft - adjDevLeft), sp + rice, (Xleft + adjDevRight), sp + glut);
                     break;
                 case 10:
                     sp = 690;
-                    coord = new Coordinate(Xright, sp, Xright, sp + 18, Xright, sp + 33, Xright, sp + 48, Xright, sp + 67, Xright, sp + 120);
+                    coord = new Coordinate(Xright, sp, Xright, sp + dish, Xright, sp + date, Xright, sp + addr, Xright, sp + logo,
+                        (Xright - adjDevLeft), sp + cold, (Xright + adjDevRight), sp + spec, (Xright - adjDevLeft), sp + rice, (Xright + adjDevRight), sp + glut);
                     break;
                 default:
-                    coord = new Coordinate(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+                    coord = new Coordinate(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
                     break;
             }
 
-            DrawLabelOnPaperByPosition(graph, label, fontName, fontOther, coord);
+            DrawLabelOnPaperByPosition(graph, label, fontBig, fontMedium, fontSmall, coord);
         }
-        private static void DrawLabelOnPaperByPosition(XGraphics graph, Order label, XFont fontName, XFont fontOther, Coordinate c)
-        {
-            graph.DrawString(label.Name, fontName, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), c.NameXcoord, c.NameYcoord, XStringFormats.Center);
-            graph.DrawString(label.Dish, fontOther, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), c.DishXcoord, c.DishYcoord, XStringFormats.Center);
-            graph.DrawString(label.Date, fontOther, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), c.DateXcoord, c.DateYcoord, XStringFormats.Center);
-            graph.DrawString(label.Addr, fontOther, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), c.AddrXcoord, c.AddrYcoord, XStringFormats.Center);
 
-            graph.DrawImage(XImage.FromFile(label.Logo), c.LogoXcoord - 60, c.LogoYcoord);
+        private static void DrawLabelOnPaperByPosition(XGraphics graph, Order label, XFont fontBig, XFont fontMedium, XFont fontSmall, Coordinate c)
+        {
+            string placeHolderStringCold = "Lev kall";
+            string placeHolderStringSpecial = "Specialpack";
+            string placeHolderStringNoRice = "Inget ris";
+            string placeHolderStringGluten = "Glutenfritt";
+
+            graph.DrawString(label.Name, fontBig, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), c.NameXcoord, c.NameYcoord, XStringFormats.Center);
+            graph.DrawString(label.Dish, fontMedium, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), c.DishXcoord, c.DishYcoord, XStringFormats.Center);
+            graph.DrawString(label.Date, fontMedium, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), c.DateXcoord, c.DateYcoord, XStringFormats.Center);
+            graph.DrawString(label.Addr, fontMedium, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), c.AddrXcoord, c.AddrYcoord, XStringFormats.Center);
 
             if (label.DeliverCold)
             {
-                graph.DrawString("Levereras kall", fontName, new XSolidBrush(XColor.FromCmyk(100, 33, 0, 0)), c.ColdXcoord, c.ColdYcoord, XStringFormats.Center);
+                graph.DrawString("Lev kall", fontSmall, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), c.ColdXcoord, c.ColdYcoord, XStringFormats.Center);
             }
+
+            if (label.SpecialPackaging)
+            {
+                graph.DrawString("Specialpack", fontSmall, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), c.SpecXcoord, c.SpecYcoord, XStringFormats.Center);
+            }
+
+            if (label.NoRice)
+            {
+                graph.DrawString("Inget ris", fontSmall, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), c.RiceXcoord, c.RiceYcoord, XStringFormats.Center);
+            }
+
+            if (label.NoGluten)
+            {
+                graph.DrawString("Glutenfritt", fontSmall, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), c.GlutXcoord, c.GlutYcoord, XStringFormats.Center);
+            }
+
+            graph.DrawImage(XImage.FromFile(label.Logo), c.LogoXcoord - 60, c.LogoYcoord);
+
         }
 
         #endregion

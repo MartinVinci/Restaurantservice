@@ -50,7 +50,7 @@ namespace Restaurantservice
                 //conn = new MySqlConnection(cs);
                 conn.Open();
 
-                string query = "SELECT bru.firstname, bru.lastname, pro.product_name, ord.delivery_date, bru.delivery_street, ord.served_cold, meta1.meta_value, meta2.meta_value, ord.special_packaging " +
+                string query = "SELECT bru.firstname, bru.lastname, pro.product_name, ord.delivery_date, bru.delivery_street, ord.served_cold, meta1.meta_value, meta2.meta_value, ord.special_packaging, ord.no_rice, ord.gluten_free, pro.product_group " +
                                 "FROM kgportal_orders as ord " +
                                 "INNER JOIN kgportal_brukare as bru ON ord.customer = bru.id " +
                                 "INNER JOIN kgportal_products as pro ON ord.item_id = pro.id " +
@@ -59,6 +59,8 @@ namespace Restaurantservice
                                 "WHERE meta1.meta_key = 'enhet' AND meta2.meta_key = 'restaurant' AND ord.delivery_date = '"
                                 + deliveryDate
                                 + "'";
+
+               
 
                 MySqlCommand cmd = new MySqlCommand(query, conn);
                 rdr = cmd.ExecuteReader();
@@ -72,9 +74,13 @@ namespace Restaurantservice
                     bool cold = rdr.GetBoolean(5);
                     string pickupRest = rdr.GetString(7);
                     bool specialPackaging = rdr.GetBoolean(8);
+                    bool noRice = rdr.GetBoolean(9);
+                    bool glutenFree = rdr.GetBoolean(10);
+                    int productGroup = rdr.GetInt32(11);
 
                     date = date.Substring(0, 10);
-                    Order order = new Order(name, dish, date, addr, cold, pickupRest, specialPackaging);
+
+                    Order order = new Order(name, dish, date, addr, cold, pickupRest, specialPackaging, noRice, glutenFree, productGroup);
 
                     if (order.PickupRestaurant.ToLower() == pickupRestaurant)
                     {
@@ -124,7 +130,6 @@ namespace Restaurantservice
                         + "AND ord.delivery_date <= '2017-05-15' "
                         + "GROUP BY ord.item_id, bru.id "
                         + "ORDER BY bru.id ";
-
 
                 MySqlCommand cmd = new MySqlCommand(query, conn);
                 rdr = cmd.ExecuteReader();

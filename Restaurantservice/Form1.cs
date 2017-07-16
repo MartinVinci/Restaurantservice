@@ -30,13 +30,13 @@ namespace Restaurantservice
         {
             InitializeComponent();
             CustomInitialize();
-           // DevelopmentInitialize(); // TODO remove at release
+            DevelopmentInitialize(); // TODO remove at release
         }
         private void DevelopmentInitialize()
         {
-            //DataBaseVersion = DATABASETEST;
+            //CreateLabels(DateTime.Now.ToShortDateString(), false, PICKUP_JAGERSRO);
 
-            //CreateTentativeOrders(DateTime.Now, PICKUP_JAGERSRO);
+            CreateTentativeOrders(DateTime.Now, PICKUP_JAGERSRO);
 
         }
         private void CustomInitialize()
@@ -225,24 +225,38 @@ namespace Restaurantservice
                                                  where o.Addr == addr
                                                  select o).ToList();
 
-
                     List<TentativeOrder> tentativeOrders = GetTentativeOrders(ordersForAddr);
 
-                    TentativeOrderList tentList = new TentativeOrderList(addr, tentativeOrders);
+                    int totalDishCount = GetTotalDishCount(tentativeOrders);
+                    TentativeOrderList tentList = new TentativeOrderList(addr, tentativeOrders, totalDishCount);
 
                     listOfTentativeOrderList.Add(tentList);
                 }
-                
+
                 // Add total tentative orders to print after everything else
                 var allTentativeOrders = GetTentativeOrders(allOrdersFromDB);
-                TentativeOrderList tentListTotal = new TentativeOrderList("- - Totalt - - ", allTentativeOrders);
+                int allTotalDishCount = GetTotalDishCount(allTentativeOrders);
+                TentativeOrderList tentListTotal = new TentativeOrderList("- - Totalt - - ", allTentativeOrders, allTotalDishCount);
                 listOfTentativeOrderList.Add(tentListTotal);
 
                 PdfCreator.CreateTentativeOrders(listOfTentativeOrderList, deliveryDate, pickupRest);
                 MessageBox.Show("Preliminära beställningar skapade!");
             }
         }
+        private int GetTotalDishCount(List<TentativeOrder> tentativeOrders)
+        {
+            int returnInt = 0;
 
+            foreach (var tent in tentativeOrders)
+            {
+                if (tent.IsCountableDish)
+                {
+                    returnInt += tent.Quantity;
+                }
+            }
+
+            return returnInt;
+        }
         private List<TentativeOrder> GetTentativeOrders(List<Order> orders)
         {
             List<string> uniqueDishes = (from o in orders
@@ -251,16 +265,75 @@ namespace Restaurantservice
 
             List<TentativeOrder> tentativeOrders = new List<TentativeOrder>();
 
-            foreach (var item in uniqueDishes)
+            foreach (var dish in uniqueDishes)
             {
-                var count = (from o in orders
-                             where o.Dish == item
-                             select o).Count();
+                var subOrders = (from o in orders
+                                 where o.Dish == dish
+                                 select o).ToList();
 
-                tentativeOrders.Add(new TentativeOrder(item, count));
+                int dishCount = GetDishCount(subOrders);
+                string infoText = GetInfoText(subOrders);
+                bool isCountableDish = GetIsCountableDish(subOrders);
+
+                tentativeOrders.Add(new TentativeOrder(dish, dishCount, infoText, isCountableDish));
             }
 
             return tentativeOrders;
+        }
+        private int GetNoRice(List<Order> subOrders)
+        {
+            return (from hits in subOrders
+                    where hits.NoRice == true
+                    select hits).Count();
+        }
+
+        private int GetNoGluten(List<Order> subOrders)
+        {
+            return (from hits in subOrders
+                    where hits.NoGluten == true
+                    select hits).Count();
+        }
+
+        private string GetInfoText(List<Order> subOrders)
+        {
+            string returnText = "";
+
+            int noRice = GetNoRice(subOrders);
+            int noGluten = GetNoGluten(subOrders);
+
+            if (noRice > 0 || noGluten > 0)
+            {
+                returnText += ", varav ";
+            }
+
+            if (noRice > 0)
+            {
+                returnText += string.Format("{0} utan ris och ", noRice);
+            }
+
+            if (noGluten > 0)
+            {
+                returnText += string.Format("{0} utan gluten ", noGluten);
+            }
+
+            return returnText;
+        }
+
+        private int GetDishCount(List<Order> subOrders)
+        {
+            return subOrders.Count();
+        }
+
+        private bool GetIsCountableDish(List<Order> subOrders)
+        {
+            if (subOrders[0].ProductGroup == 1 || subOrders[0].ProductGroup == 2)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
         private void CreateLabels(string date, bool tomorrow, string pickupRest)
         {
