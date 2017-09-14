@@ -321,8 +321,8 @@ namespace Restaurantservice
 
             try
             {
-                manuallyAdjustLeftColumn = Int32.Parse(ConfigurationManager.AppSettings["LeftColumnPosition"]);
-                manuallyAdjustRigthColumn = Int32.Parse(ConfigurationManager.AppSettings["RigthColumnPosition"]);
+                manuallyAdjustLeftColumn = Form1.LEFT_COLUMN_ADJUST;
+                manuallyAdjustRigthColumn = Form1.RIGHT_COLUMN_ADJUST;
             }
             catch
             {

@@ -25,18 +25,22 @@ namespace Restaurantservice
         public static string PICKUP_MOBILIA = "mobilia";
         public static string PICKUP_JAGERSRO = "jägersro";
 
+        public static int LEFT_COLUMN_ADJUST = Int32.Parse(ConfigurationManager.AppSettings["LeftColumnPosition"]);
+        public static int RIGHT_COLUMN_ADJUST = Int32.Parse(ConfigurationManager.AppSettings["RigthColumnPosition"]);
+
+
         public static string DataBaseVersion = "";
         public Form1()
         {
             InitializeComponent();
             CustomInitialize();
-            DevelopmentInitialize(); // TODO remove at release
+            //DevelopmentInitialize(); // TODO remove at release
         }
         private void DevelopmentInitialize()
         {
             //CreateLabels(DateTime.Now.ToShortDateString(), false, PICKUP_JAGERSRO);
 
-            CreateTentativeOrders(DateTime.Now, PICKUP_JAGERSRO);
+            //CreateTentativeOrders(DateTime.Now, PICKUP_JAGERSRO);
 
         }
         private void CustomInitialize()
@@ -46,9 +50,21 @@ namespace Restaurantservice
             rbnRealDatabase.Checked = true;
             rbnRealDatabase.Enabled = false;
             rbnTestDataBase.Enabled = false;
-            lblVersion.Text = "Version: 1.4 - 17-06-08";
+            lblVersion.Text = "Version: 1.5 - 17-07-17";
 
             DataBaseVersion = DATABASELIVE;
+
+            nudLeftColumn.Enabled = false;
+            nudLeftColumn.Maximum = 1000;
+            nudLeftColumn.Minimum = -1000;
+            nudLeftColumn.Value = LEFT_COLUMN_ADJUST;
+
+            nudRightColumn.Enabled = false;
+            nudRightColumn.Maximum = 1000;
+            nudRightColumn.Minimum = -1000;
+            nudRightColumn.Value = RIGHT_COLUMN_ADJUST;
+            btnColumnXPosition.Enabled = false;
+
         }
 
         #region Forms actions
@@ -186,15 +202,68 @@ namespace Restaurantservice
             {
                 rbnRealDatabase.Enabled = true;
                 rbnTestDataBase.Enabled = true;
+
+                nudLeftColumn.Enabled = true;
+                nudRightColumn.Enabled = true;
+                btnColumnXPosition.Enabled = true;
             }
             else
             {
                 MessageBox.Show("Fel lösenord");
             }
         }
+
+        private void btnColumnXPosition_Click(object sender, EventArgs e)
+        {
+            ChangeColumnsAdjustments();
+        }
+
+        private void btnColumnAdjustmentInformation_Click(object sender, EventArgs e)
+        {
+            string text = "Här kan du ändra positionen i sidled för etiketterna. \n";
+            text += "Du flyttar de fem etiketterna som finns på vänstra ";
+            text += "sidan av pappret genom att ändra siffran uppåt eller nedåt. ";
+            text += "Tänk på att det går att ha negativa tal också, tex -5.\n\n";
+            text += "Ökar du siffran kommer etiketterna hamna längre till höger ";
+            text += "på pappret och minskar du siffran flyttas etiketterna till vänster. \n\n";
+            text += "Du får prova dig fram till vad som blir bra, men höjs talet med 10 ";
+            text += "innebär det ca 4 mm.";
+
+            MessageBox.Show(text);
+        }
         #endregion
 
         #region Methods
+        private void ChangeColumnsAdjustments()
+        {
+            try
+            {
+                int leftAdjust = (int)nudLeftColumn.Value;
+                int rightAdjust = (int)nudRightColumn.Value;
+
+                string appPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+                string configFile = System.IO.Path.Combine(appPath, "Restaurantservice.exe.config");
+
+                ExeConfigurationFileMap configFileMap = new ExeConfigurationFileMap();
+                configFileMap.ExeConfigFilename = configFile;
+                System.Configuration.Configuration config = ConfigurationManager.OpenMappedExeConfiguration(configFileMap, ConfigurationUserLevel.None);
+
+                config.AppSettings.Settings["LeftColumnPosition"].Value = leftAdjust.ToString();
+                config.AppSettings.Settings["RigthColumnPosition"].Value = rightAdjust.ToString();
+
+                LEFT_COLUMN_ADJUST = leftAdjust;
+                RIGHT_COLUMN_ADJUST = rightAdjust;
+
+                config.Save();
+
+                MessageBox.Show("Ändringarna sparade.");
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("Något gick dessvärre fel" + e.ToString());
+            }
+        }
+
         private void CreateInvoiceCsvFile()
         {
             List<InvoiceDataRow> invoiceDataRows = DataAccess.GetInvoiceData();
@@ -283,14 +352,20 @@ namespace Restaurantservice
         private int GetNoRice(List<Order> subOrders)
         {
             return (from hits in subOrders
-                    where hits.NoRice == true
+                    where hits.NoRice == true && hits.NoGluten == false
                     select hits).Count();
         }
 
         private int GetNoGluten(List<Order> subOrders)
         {
             return (from hits in subOrders
-                    where hits.NoGluten == true
+                    where hits.NoGluten == true && hits.NoRice == false
+                    select hits).Count();
+        }
+        private int GetNoRiceAndGluten(List<Order> subOrders)
+        {
+            return (from hits in subOrders
+                    where hits.NoGluten == true && hits.NoRice == true
                     select hits).Count();
         }
 
@@ -300,6 +375,7 @@ namespace Restaurantservice
 
             int noRice = GetNoRice(subOrders);
             int noGluten = GetNoGluten(subOrders);
+            int noRiceOrGluten = GetNoRiceAndGluten(subOrders);
 
             if (noRice > 0 || noGluten > 0)
             {
@@ -308,12 +384,15 @@ namespace Restaurantservice
 
             if (noRice > 0)
             {
-                returnText += string.Format("{0} utan ris och ", noRice);
+                returnText += string.Format("{0} ej ris. ", noRice);
             }
-
             if (noGluten > 0)
             {
-                returnText += string.Format("{0} utan gluten ", noGluten);
+                returnText += string.Format("{0} ej gluten. ", noGluten);
+            }
+            if(noRiceOrGluten > 0)
+            {
+                returnText += string.Format("{0} ej ris ELLER gluten.", noRiceOrGluten);
             }
 
             return returnText;
@@ -393,12 +472,14 @@ namespace Restaurantservice
 
         }
 
+
+
+
+
+
         #endregion
 
-
-
-
-
+        
     }
 }
 

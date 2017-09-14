@@ -37,7 +37,7 @@ namespace Restaurantservice
         public static List<Order> GetTodaysOrders(string deliveryDate, string pickupRestaurant)
         {
             // use this during development if you want to set at specific date.
-            //deliveryDate = "2017-06-01";
+            // deliveryDate = "2017-04-30";
 
             MySqlConnection conn = GetSqlConnection();
 
