@@ -19,8 +19,9 @@ namespace Restaurantservice
         public bool NoRice { get; set; }
         public bool NoGluten { get; set; }
         public int ProductGroup { get; set; }
+        public bool NoLactose { get; set; }
 
-        public Order(string name, string dish, string date, string addr, bool deliverCold, string pickupRest, bool specialPackaging, bool noRice, bool noGluten, int productGroup)
+        public Order(string name, string dish, string date, string addr, bool deliverCold, string pickupRest, bool specialPackaging, bool noRice, bool noGluten, int productGroup, bool noLactose)
         {
             Name = name;
             Dish = dish;
@@ -33,6 +34,22 @@ namespace Restaurantservice
             NoRice = noRice;
             NoGluten = noGluten;
             ProductGroup = productGroup;
+            NoLactose = noLactose;
+        }
+        public Order(Order copy)
+        {
+            Name = copy.Name;
+            Dish = copy.Dish;
+            Date = copy.Date;
+            Addr = copy.Addr;
+            Logo = copy.Logo;
+            DeliverCold = copy.DeliverCold;
+            PickupRestaurant = copy.PickupRestaurant;
+            SpecialPackaging = copy.SpecialPackaging;
+            NoRice = copy.NoRice;
+            NoGluten = copy.NoGluten;
+            ProductGroup = copy.ProductGroup;
+            NoLactose = copy.NoLactose;
         }
     }
 }

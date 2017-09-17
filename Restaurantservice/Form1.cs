@@ -50,7 +50,7 @@ namespace Restaurantservice
             rbnRealDatabase.Checked = true;
             rbnRealDatabase.Enabled = false;
             rbnTestDataBase.Enabled = false;
-            lblVersion.Text = "Version: 1.5 - 17-07-17";
+            lblVersion.Text = "Version: 1.6 - 17-09-17";
 
             DataBaseVersion = DATABASELIVE;
 
@@ -294,24 +294,60 @@ namespace Restaurantservice
                                                  where o.Addr == addr
                                                  select o).ToList();
 
-                    List<TentativeOrder> tentativeOrders = GetTentativeOrders(ordersForAddr);
+                    List<Order> specialPackOrdersForAddr = GetSpecialPackOrders(ordersForAddr);
 
-                    int totalDishCount = GetTotalDishCount(tentativeOrders);
-                    TentativeOrderList tentList = new TentativeOrderList(addr, tentativeOrders, totalDishCount);
+                    ordersForAddr = ordersForAddr.Except(specialPackOrdersForAddr).ToList();
 
-                    listOfTentativeOrderList.Add(tentList);
+                    // Add normal orders
+                    var normalTentativeOrderList = CreateTentativeOrderList(addr, ordersForAddr);
+                    listOfTentativeOrderList.Add(normalTentativeOrderList);
+
+                    // Add specialpack orders
+                    var specialPackTentativeOrderList = CreateTentativeOrderList((addr + " specialpack"), specialPackOrdersForAddr);
+                    listOfTentativeOrderList.Add(specialPackTentativeOrderList);
                 }
 
                 // Add total tentative orders to print after everything else
-                var allTentativeOrders = GetTentativeOrders(allOrdersFromDB);
-                int allTotalDishCount = GetTotalDishCount(allTentativeOrders);
-                TentativeOrderList tentListTotal = new TentativeOrderList("- - Totalt - - ", allTentativeOrders, allTotalDishCount);
-                listOfTentativeOrderList.Add(tentListTotal);
+                var totalOrdersTentList = CreateTentativeOrderList("- - TOTALT - -", allOrdersFromDB);
+                listOfTentativeOrderList.Add(totalOrdersTentList);
+
+                List<Order> allSpecialPackOrders = GetSpecialPackOrders(allOrdersFromDB);
+
+                allOrdersFromDB = allOrdersFromDB.Except(allSpecialPackOrders).ToList();
+
+                // Add only normal orders
+                var allNormalOrdersTentList = CreateTentativeOrderList("- - Totalt normala beställningar - -", allOrdersFromDB);
+                listOfTentativeOrderList.Add(allNormalOrdersTentList);
+
+                // Add tentative orders
+                var allSpecialPackOrdersTentList = CreateTentativeOrderList("- - Totalt specialpack beställningar - -", allSpecialPackOrders);
+                listOfTentativeOrderList.Add(allSpecialPackOrdersTentList);
+
+                //var allTentativeOrders = GetTentativeOrders(allOrdersFromDB);
+                //int allTotalDishCount = GetTotalDishCount(allTentativeOrders);
+                //TentativeOrderList tentListTotal = new TentativeOrderList("- - Totalt - - ", allTentativeOrders, allTotalDishCount);
+                //listOfTentativeOrderList.Add(tentListTotal);
 
                 PdfCreator.CreateTentativeOrders(listOfTentativeOrderList, deliveryDate, pickupRest);
                 MessageBox.Show("Preliminära beställningar skapade!");
             }
         }
+        private TentativeOrderList CreateTentativeOrderList(string address, List<Order> orderList)
+        {
+            List<TentativeOrder> tentativeOrders = GetTentativeOrders(orderList);
+
+            int totalDishCount = GetTotalDishCount(tentativeOrders);
+            TentativeOrderList tentList = new TentativeOrderList(address, tentativeOrders, totalDishCount);
+
+            return tentList;
+        }
+        private List<Order> GetSpecialPackOrders(List<Order> orderList)
+        {
+            return (from hits in orderList
+                    where hits.SpecialPackaging == true
+                    select hits).ToList();
+        }
+
         private int GetTotalDishCount(List<TentativeOrder> tentativeOrders)
         {
             int returnInt = 0;
@@ -368,16 +404,22 @@ namespace Restaurantservice
                     where hits.NoGluten == true && hits.NoRice == true
                     select hits).Count();
         }
-
+        private int GetNoLactose(List<Order> subOrders)
+        {
+            return (from hits in subOrders
+                    where hits.NoLactose == true
+                    select hits).Count();
+        }
         private string GetInfoText(List<Order> subOrders)
         {
             string returnText = "";
 
             int noRice = GetNoRice(subOrders);
             int noGluten = GetNoGluten(subOrders);
+            int noLactose = GetNoLactose(subOrders);
             int noRiceOrGluten = GetNoRiceAndGluten(subOrders);
 
-            if (noRice > 0 || noGluten > 0)
+            if (noRice > 0 || noGluten > 0 || noLactose > 0)
             {
                 returnText += ", varav ";
             }
@@ -390,7 +432,11 @@ namespace Restaurantservice
             {
                 returnText += string.Format("{0} ej gluten. ", noGluten);
             }
-            if(noRiceOrGluten > 0)
+            if (noLactose > 0)
+            {
+                returnText += string.Format("{0} ej laktos. ", noLactose);
+            }
+            if (noRiceOrGluten > 0)
             {
                 returnText += string.Format("{0} ej ris ELLER gluten.", noRiceOrGluten);
             }
@@ -479,7 +525,7 @@ namespace Restaurantservice
 
         #endregion
 
-        
+
     }
 }
 

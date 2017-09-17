@@ -185,8 +185,11 @@ namespace Restaurantservice
             //    }
             //}
 
+
             // Sort by delivery address, then by dish
             orders = orders.OrderBy(o => o.Addr).ThenBy(o => o.Dish).ToList();
+            // Add a second label to Norsk Fjordlax
+            orders = AddLabelForNorskFjordlax(orders);
 
             // Initial set up for page
             PdfDocument pdf = new PdfDocument();
@@ -195,7 +198,7 @@ namespace Restaurantservice
 
             XFont fontBig = new XFont("Times New Roman", 20, XFontStyle.Regular);
             XFont fontMedium = new XFont("Times New Roman", 12, XFontStyle.Regular);
-            XFont fontSmall = new XFont("Times New Roman", 10, XFontStyle.Regular);
+            XFont fontSmall = new XFont("Times New Roman", 12, XFontStyle.Regular);
             XGraphics graph = XGraphics.FromPdfPage(pdfPage);
 
 
@@ -234,6 +237,26 @@ namespace Restaurantservice
                 showAppConfigErrorMessage = true;
                 Process.Start(filePath);
             }
+        }
+
+        private static List<Order> AddLabelForNorskFjordlax(List<Order> orders)
+        {
+            for (int i = orders.Count() -1; i >= 0; i--)
+            {
+                if(orders[i].Dish == "Hemgravad norsk fjordlax")
+                {
+                    //var orderCopy = orders[i];
+                    var orderCopy = new Order(orders[i]);
+
+                    orders.Insert(i + 1, orderCopy);
+                    orders[i].Name += " 1/2";
+                    orders[i +1].Name += " 2/2";
+
+                }
+            }
+
+            return orders;
+
         }
 
         //private static void DrawLabelOnPaperSaved(XGraphics graph, Order label, XFont fontName, XFont fontOther, int position)
@@ -347,68 +370,70 @@ namespace Restaurantservice
 
             int cold = 63;
             int spec = 63;
+            // int for future needs = 63;
             int rice = 78;
             int glut = 78;
+            int lact = 78;
 
             int logo = 93;
 
-            int adjDevLeft = 25;
-            int adjDevRight = 25;
+            int adjDevLeft = 60;
+            int adjDevRight = 60;
 
             switch (position)
             {
                 case 1:
                     sp = 45;
                     coord = new Coordinate(Xleft, sp, Xleft, sp + dish, Xleft, sp + date, Xleft, sp + addr, Xleft, sp + logo,
-                        (Xleft - adjDevLeft), sp + cold, (Xleft + adjDevRight), sp + spec, (Xleft - adjDevLeft), sp + rice, (Xleft + adjDevRight), sp + glut);
+                        (Xleft - adjDevLeft), sp + cold, (Xleft + adjDevRight), sp + spec, (Xleft - adjDevLeft), sp + rice, (Xleft + adjDevRight), sp + glut, Xleft, sp + lact);
                     break;
                 case 2:
                     sp = 45;
                     coord = new Coordinate(Xright, sp, Xright, sp + dish, Xright, sp + date, Xright, sp + addr, Xright, sp + logo,
-                        (Xright - adjDevLeft), sp + cold, (Xright + adjDevRight), sp + spec, (Xright - adjDevLeft), sp + rice, (Xright + adjDevRight), sp + glut);
+                        (Xright - adjDevLeft), sp + cold, (Xright + adjDevRight), sp + spec, (Xright - adjDevLeft), sp + rice, (Xright + adjDevRight), sp + glut, Xright, sp + lact);
                     break;
                 case 3:
                     sp = 205;
                     coord = new Coordinate(Xleft, sp, Xleft, sp + dish, Xleft, sp + date, Xleft, sp + addr, Xleft, sp + logo,
-                        (Xleft - adjDevLeft), sp + cold, (Xleft + adjDevRight), sp + spec, (Xleft - adjDevLeft), sp + rice, (Xleft + adjDevRight), sp + glut);
+                        (Xleft - adjDevLeft), sp + cold, (Xleft + adjDevRight), sp + spec, (Xleft - adjDevLeft), sp + rice, (Xleft + adjDevRight), sp + glut, Xleft, sp + lact);
                     break;
                 case 4:
                     sp = 205;
                     coord = new Coordinate(Xright, sp, Xright, sp + dish, Xright, sp + date, Xright, sp + addr, Xright, sp + logo,
-                        (Xright - adjDevLeft), sp + cold, (Xright + adjDevRight), sp + spec, (Xright - adjDevLeft), sp + rice, (Xright + adjDevRight), sp + glut);
+                        (Xright - adjDevLeft), sp + cold, (Xright + adjDevRight), sp + spec, (Xright - adjDevLeft), sp + rice, (Xright + adjDevRight), sp + glut, Xright, sp + lact);
                     break;
                 case 5:
                     sp = 365;
                     coord = new Coordinate(Xleft, sp, Xleft, sp + dish, Xleft, sp + date, Xleft, sp + addr, Xleft, sp + logo,
-                        (Xleft - adjDevLeft), sp + cold, (Xleft + adjDevRight), sp + spec, (Xleft - adjDevLeft), sp + rice, (Xleft + adjDevRight), sp + glut);
+                        (Xleft - adjDevLeft), sp + cold, (Xleft + adjDevRight), sp + spec, (Xleft - adjDevLeft), sp + rice, (Xleft + adjDevRight), sp + glut, Xleft, sp + lact);
                     break;
                 case 6:
                     sp = 365;
                     coord = new Coordinate(Xright, sp, Xright, sp + dish, Xright, sp + date, Xright, sp + addr, Xright, sp + logo,
-                        (Xright - adjDevLeft), sp + cold, (Xright + adjDevRight), sp + spec, (Xright - adjDevLeft), sp + rice, (Xright + adjDevRight), sp + glut);
+                        (Xright - adjDevLeft), sp + cold, (Xright + adjDevRight), sp + spec, (Xright - adjDevLeft), sp + rice, (Xright + adjDevRight), sp + glut, Xright, sp + lact);
                     break;
                 case 7:
                     sp = 530;
                     coord = new Coordinate(Xleft, sp, Xleft, sp + dish, Xleft, sp + date, Xleft, sp + addr, Xleft, sp + logo,
-                        (Xleft - adjDevLeft), sp + cold, (Xleft + adjDevRight), sp + spec, (Xleft - adjDevLeft), sp + rice, (Xleft + adjDevRight), sp + glut);
+                        (Xleft - adjDevLeft), sp + cold, (Xleft + adjDevRight), sp + spec, (Xleft - adjDevLeft), sp + rice, (Xleft + adjDevRight), sp + glut, Xleft, sp + lact);
                     break;
                 case 8:
                     sp = 530;
                     coord = new Coordinate(Xright, sp, Xright, sp + dish, Xright, sp + date, Xright, sp + addr, Xright, sp + logo,
-                        (Xright - adjDevLeft), sp + cold, (Xright + adjDevRight), sp + spec, (Xright - adjDevLeft), sp + rice, (Xright + adjDevRight), sp + glut);
+                        (Xright - adjDevLeft), sp + cold, (Xright + adjDevRight), sp + spec, (Xright - adjDevLeft), sp + rice, (Xright + adjDevRight), sp + glut, Xright, sp + lact);
                     break;
                 case 9:
                     sp = 690;
                     coord = new Coordinate(Xleft, sp, Xleft, sp + dish, Xleft, sp + date, Xleft, sp + addr, Xleft, sp + logo,
-                        (Xleft - adjDevLeft), sp + cold, (Xleft + adjDevRight), sp + spec, (Xleft - adjDevLeft), sp + rice, (Xleft + adjDevRight), sp + glut);
+                        (Xleft - adjDevLeft), sp + cold, (Xleft + adjDevRight), sp + spec, (Xleft - adjDevLeft), sp + rice, (Xleft + adjDevRight), sp + glut, Xleft, sp + lact);
                     break;
                 case 10:
                     sp = 690;
                     coord = new Coordinate(Xright, sp, Xright, sp + dish, Xright, sp + date, Xright, sp + addr, Xright, sp + logo,
-                        (Xright - adjDevLeft), sp + cold, (Xright + adjDevRight), sp + spec, (Xright - adjDevLeft), sp + rice, (Xright + adjDevRight), sp + glut);
+                        (Xright - adjDevLeft), sp + cold, (Xright + adjDevRight), sp + spec, (Xright - adjDevLeft), sp + rice, (Xright + adjDevRight), sp + glut, Xright, sp + lact);
                     break;
                 default:
-                    coord = new Coordinate(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+                    coord = new Coordinate(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
                     break;
             }
 
@@ -417,11 +442,6 @@ namespace Restaurantservice
 
         private static void DrawLabelOnPaperByPosition(XGraphics graph, Order label, XFont fontBig, XFont fontMedium, XFont fontSmall, Coordinate c)
         {
-            string placeHolderStringCold = "Lev kall";
-            string placeHolderStringSpecial = "Specialpack";
-            string placeHolderStringNoRice = "Inget ris";
-            string placeHolderStringGluten = "Glutenfritt";
-
             graph.DrawString(label.Name, fontBig, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), c.NameXcoord, c.NameYcoord, XStringFormats.Center);
             graph.DrawString(label.Dish, fontMedium, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), c.DishXcoord, c.DishYcoord, XStringFormats.Center);
             graph.DrawString(label.Date, fontMedium, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), c.DateXcoord, c.DateYcoord, XStringFormats.Center);
@@ -445,6 +465,12 @@ namespace Restaurantservice
             if (label.NoGluten)
             {
                 graph.DrawString("Glutenfritt", fontSmall, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), c.GlutXcoord, c.GlutYcoord, XStringFormats.Center);
+            }
+
+            if (label.NoLactose)
+            {
+                graph.DrawString("Laktosfritt", fontSmall, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), c.LactXcoord, c.LactYcoord, XStringFormats.Center);
+
             }
 
             graph.DrawImage(XImage.FromFile(label.Logo), c.LogoXcoord - 60, c.LogoYcoord);
