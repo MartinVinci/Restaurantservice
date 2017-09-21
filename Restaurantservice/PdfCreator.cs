@@ -186,10 +186,6 @@ namespace Restaurantservice
             //}
 
 
-            // Sort by delivery address, then by dish
-            orders = orders.OrderBy(o => o.Addr).ThenBy(o => o.Dish).ToList();
-            // Add a second label to Norsk Fjordlax
-            orders = AddLabelForNorskFjordlax(orders);
 
             // Initial set up for page
             PdfDocument pdf = new PdfDocument();
@@ -239,25 +235,7 @@ namespace Restaurantservice
             }
         }
 
-        private static List<Order> AddLabelForNorskFjordlax(List<Order> orders)
-        {
-            for (int i = orders.Count() -1; i >= 0; i--)
-            {
-                if(orders[i].Dish == "Hemgravad norsk fjordlax")
-                {
-                    //var orderCopy = orders[i];
-                    var orderCopy = new Order(orders[i]);
-
-                    orders.Insert(i + 1, orderCopy);
-                    orders[i].Name += " 1/2";
-                    orders[i +1].Name += " 2/2";
-
-                }
-            }
-
-            return orders;
-
-        }
+        
 
         //private static void DrawLabelOnPaperSaved(XGraphics graph, Order label, XFont fontName, XFont fontOther, int position)
         //{

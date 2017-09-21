@@ -296,6 +296,7 @@ namespace Restaurantservice
 
                     List<Order> specialPackOrdersForAddr = GetSpecialPackOrders(ordersForAddr);
 
+                    // TODO kolla att rätt tas bort
                     ordersForAddr = ordersForAddr.Except(specialPackOrdersForAddr).ToList();
 
                     // Add normal orders
@@ -473,6 +474,14 @@ namespace Restaurantservice
             }
             else
             {
+                // Sort orders
+                // Sort by delivery address, then by dish
+                orders = orders.OrderBy(o => o.Addr).ThenBy(o => o.Dish).ToList();
+                //orders = SortOrdersToMatchProductionNeeds(orders);
+
+                // Add a second label to Norsk Fjordlax
+                orders = AddLabelForNorskFjordlax(orders);
+
                 PdfCreator.CreateLabels(orders, date, tomorrow);
 
                 if (tomorrow == false)
@@ -481,8 +490,105 @@ namespace Restaurantservice
                 }
             }
         }
-        #endregion
+        private List<Order> SortOrdersToMatchProductionNeeds(List<Order> orders)
+        {
+            #region Niklas wishes
+            /*
+            Först kommer alla ”Varm dagens”. Det innebär att först kommer alla varma dagens för Grupp A, 
+              sedan alla varma dagens för Bellis och sedan alla varma dagens för Oxievång.
+            Först kommer alla "Varm dagens" Det innebär att först kommer alla varma dagens för Grupp A 
+              sedan kommer alla avvikande till Grupp A såom kallt, gluten ris etc
+            
+            Därefter kommer alla drycker. Först kommer alla mjölk för Grupp A, sedan alla mjölk 
+              för Bellis och sedan alla mjölk för Oxievång.Sedan kommer alla öl för Grupp A, alla öl för Bellis och alla öl för Oxievång.
+            Därefter kommer alla drycker indelade gruppvis Grupp A mjölk, lättöl, måltidsdryck och 
+              mineralvatten.Därefter kommer nästa Bellis osv.
+            
+            Sedan kommer ALLA specialpack. Det innebär alltså specialpack får såväl dagens som för 
+              fläskstek. För specialpack sorterar jag alla Grupp A för sig(dvs dagens och fläskstek blandat), sedan alla Bellis för sig(dvs dagens och fläskstek blandat).Jag uppskattar att detta är lättast att hantera vid packningen, dvs att det är viktigare att Grupp A får alla sina specialpack tillsammans på etiketterna än att först ha alla specialpack - dagens per grupp, sedan specialpack - fläskstek per grupp.
+            Specialpack hanteras som reglerna ovan men som en egen grupp. Så sorteringen blir "Grupp A", 
+              "Grupp A specialpack", "Bellis", "Bellis specialpack" osv.
+            
+            Martin tolkar specialpack som bara för mat, dvs att drycker som tillhör specialpack finns 
+              tillsammans med alla andra drycker.
+            Det är riktigt med förtydligande om att det är en egen grupp
+            
+            Sedan kommer alla övriga specialare.Alla specialare är grupperade per grupp, 
+              vilket innebär att samtliga specialare för Grupp A kommer tillsammans, sedan kommer samtliga specialare för Bellis och sen samtliga specialare för Oxievång. Även här uppfattar jag det som lättare vid packningen att ha alla Grupp As etiketter samlade än att splitta upp dem för den lilla vinsten att få samtliga utan ris tillsammans.
+            Alla specialare sorteras in sist inom varje grupp (det blir nog lättare vid sorteringen)
+            
+            Ovan innebär alltså också att "Sallad" kommer blandat, dvs uppdelat per grupp för 
+              specialare, alternativt hade jag kunnat lägga ALLA sallad efter specialpack men innan specialarna. 
+              I så fall kommer alla sallad för Grupp A, sedan alla sallad för Bellis och sedan alla sallad för Oxievång.Det innebär också att ALLA sallad kommer tillsammans, oavsett om de tillhör en dagens, en fläskstek, en specialpack eller någon som inte ska ha ris.
+            Lägg alla sallader sist efter drickan.
+            */
 
+            var ordersInCount = orders.Count();
+            #endregion
+            var returnList = new List<Order>();
+
+
+
+
+
+
+
+
+
+            if (ordersInCount == returnList.Count())
+            {
+                return returnList;
+
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        private static List<Order> AddLabelForNorskFjordlax(List<Order> orders)
+        {
+            for (int i = orders.Count() - 1; i >= 0; i--)
+            {
+                if (orders[i].Dish == "Hemgravad norsk fjordlax")
+                {
+                    //var orderCopy = orders[i];
+                    var orderCopy = new Order(orders[i]);
+
+                    orders.Insert(i + 1, orderCopy);
+                    orders[i].Name += " 1/2";
+                    orders[i + 1].Name += " 2/2";
+
+                }
+            }
+
+            return orders;
+
+        }
+        #endregion
+        #region Easter egg
+        string _eastereggstring = "";
+        private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            CheckEasterEggString(tabControl1.SelectedIndex.ToString());
+        }
+        private void CheckEasterEggString(string number)
+        {
+            _eastereggstring += number;
+
+            // Only 8 characters
+            if (_eastereggstring.Length > 4)
+            {
+                _eastereggstring = _eastereggstring.Substring(1, 4);
+            }
+
+            if (_eastereggstring == "1302")
+            {
+                MessageBox.Show("Kniv och gaffel är den bästa restaurangen i världen!");
+            }
+        }
+
+        #endregion
         // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
         #region Garbage
@@ -523,8 +629,8 @@ namespace Restaurantservice
 
 
 
-        #endregion
 
+        #endregion
 
     }
 }
