@@ -50,7 +50,7 @@ namespace Restaurantservice
             rbnRealDatabase.Checked = true;
             rbnRealDatabase.Enabled = false;
             rbnTestDataBase.Enabled = false;
-            lblVersion.Text = "Version: 1.6 - 17-09-17";
+            lblVersion.Text = "Version: 1.7 - 17-09-25";
 
             DataBaseVersion = DATABASELIVE;
 
@@ -316,13 +316,13 @@ namespace Restaurantservice
 
                 allOrdersFromDB = allOrdersFromDB.Except(allSpecialPackOrders).ToList();
 
-                // Add only normal orders
-                var allNormalOrdersTentList = CreateTentativeOrderList("- - Totalt normala beställningar - -", allOrdersFromDB);
-                listOfTentativeOrderList.Add(allNormalOrdersTentList);
+                //// Add only normal orders
+                //var allNormalOrdersTentList = CreateTentativeOrderList("- - Totalt normala beställningar - -", allOrdersFromDB);
+                //listOfTentativeOrderList.Add(allNormalOrdersTentList);
 
-                // Add tentative orders
-                var allSpecialPackOrdersTentList = CreateTentativeOrderList("- - Totalt specialpack beställningar - -", allSpecialPackOrders);
-                listOfTentativeOrderList.Add(allSpecialPackOrdersTentList);
+                //// Add tentative orders
+                //var allSpecialPackOrdersTentList = CreateTentativeOrderList("- - Totalt specialpack beställningar - -", allSpecialPackOrders);
+                //listOfTentativeOrderList.Add(allSpecialPackOrdersTentList);
 
                 //var allTentativeOrders = GetTentativeOrders(allOrdersFromDB);
                 //int allTotalDishCount = GetTotalDishCount(allTentativeOrders);
@@ -476,8 +476,8 @@ namespace Restaurantservice
             {
                 // Sort orders
                 // Sort by delivery address, then by dish
-                orders = orders.OrderBy(o => o.Addr).ThenBy(o => o.Dish).ToList();
-                //orders = SortOrdersToMatchProductionNeeds(orders);
+                //orders = orders.OrderBy(o => o.Addr).ThenBy(o => o.Dish).ToList();
+                orders = SortOrdersToMatchProductionNeeds(orders);
 
                 // Add a second label to Norsk Fjordlax
                 orders = AddLabelForNorskFjordlax(orders);
@@ -494,6 +494,13 @@ namespace Restaurantservice
         {
             #region Niklas wishes
             /*
+             * Kolumnens värden är siffror och så här betyder de idag:
+             1 = Dagens lunch
+             2 = Al a Carte
+             3 = Dessert
+             4 = Dryck
+             5 = Övrigt
+
             Först kommer alla ”Varm dagens”. Det innebär att först kommer alla varma dagens för Grupp A, 
               sedan alla varma dagens för Bellis och sedan alla varma dagens för Oxievång.
             Först kommer alla "Varm dagens" Det innebär att först kommer alla varma dagens för Grupp A 
@@ -525,16 +532,68 @@ namespace Restaurantservice
 
             var ordersInCount = orders.Count();
             #endregion
+
+            var allDrinks = (from hits in orders
+                             where hits.ProductGroup == 4
+                             select hits).ToList();
+            orders = orders.Except(allDrinks).ToList();
+
+            var allSallad = (from hits in orders
+                             where hits.ProductGroup == 5
+                             select hits).ToList();
+            orders = orders.Except(allSallad).ToList();
+
+            var groupOrdersListFood = SortLabelsByGroup(orders);
+            var groupOrdersListDrink = SortLabelsByGroup(allDrinks);
+            var groupOrdersListSallad = SortLabelsByGroup(allSallad);
+
+            // Sort each individually
+            foreach (var group in groupOrdersListFood)
+            {
+                group.Orders = SortGroupOrdersFoodIndividually(group.Orders);
+            }
+            foreach (var group in groupOrdersListDrink)
+            {
+                group.Orders = SortGroupOrdersDrinksIndividually(group.Orders);
+            }
+            foreach (var group in groupOrdersListSallad)
+            {
+                group.Orders = SortGroupOrdersSalladIndividually(group.Orders);
+            }
+
+
             var returnList = new List<Order>();
+            foreach (var group in groupOrdersListFood)
+            {
+                foreach (var order in group.Orders)
+                {
+                    returnList.Add(order);
+                }
+            }
+            foreach (var group in groupOrdersListDrink)
+            {
+                foreach (var order in group.Orders)
+                {
+                    returnList.Add(order);
+                }
+            }
+            foreach (var group in groupOrdersListSallad)
+            {
+                foreach (var order in group.Orders)
+                {
+                    returnList.Add(order);
+                }
+            }
 
+            //int ordersCounter = 0;
 
+            //ordersCounter += allDrinks.Count();
+            //ordersCounter += allSallad.Count();
 
-
-
-
-
-
-
+            //foreach (var item in groupOrdersList)
+            //{
+            //    ordersCounter += item.Orders.Count();
+            //}
             if (ordersInCount == returnList.Count())
             {
                 return returnList;
@@ -546,6 +605,72 @@ namespace Restaurantservice
             }
         }
 
+        private static List<GroupOrders> SortLabelsByGroup(List<Order> orders)
+        {
+            var groupOrdersList = new List<GroupOrders>();
+
+            foreach (var order in orders)
+            {
+                string specialPackText = order.SpecialPackaging ? " Specialpack" : "";
+                string groupName = order.Addr + specialPackText;
+
+                // Does the groupName already exists?
+                var group = (from hits in groupOrdersList
+                             where hits.GroupName == groupName
+                             select hits).FirstOrDefault();
+
+                // Add group if not exists
+                if (group == null)
+                {
+                    group = (new GroupOrders()
+                    {
+                        GroupName = groupName,
+                        Orders = new List<Order>()
+                    });
+
+                    groupOrdersList.Add(group);
+                }
+
+                // Add order to group
+                group.Orders.Add(order);
+            }
+
+            return groupOrdersList;
+        }
+        private static List<Order> SortGroupOrdersFoodIndividually(List<Order> orders)
+        {
+            var returnList = new List<Order>();
+
+            var normalDailySpecials = (from hits in orders
+                                       where hits.ProductGroup == 1 && hits.NoGluten == false && hits.NoLactose == false && hits.NoRice == false && hits.DeliverCold == false
+                                       select hits).ToList();
+            orders = orders.Except(normalDailySpecials).ToList();
+
+            orders = (from hits in orders
+                      orderby hits.Dish
+                      select hits).ToList();
+
+            returnList.AddRange(normalDailySpecials);
+            returnList.AddRange(orders);
+
+            return returnList;
+        }
+        private static List<Order> SortGroupOrdersSalladIndividually(List<Order> orders)
+        {
+            orders = (from hits in orders
+                      orderby hits.Addr, hits.Dish
+                      select hits).ToList();
+
+            return orders;
+        }
+        private static List<Order> SortGroupOrdersDrinksIndividually(List<Order> orders)
+        {
+            orders = (from hits in orders
+                      orderby hits.Addr, hits.Dish
+                      select hits).ToList();
+
+            return orders;
+        }
         private static List<Order> AddLabelForNorskFjordlax(List<Order> orders)
         {
             for (int i = orders.Count() - 1; i >= 0; i--)

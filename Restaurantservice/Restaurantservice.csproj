@@ -79,6 +79,7 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="InvoiceDataRow.cs" />
+    <Compile Include="GroupOrders.cs" />
     <Compile Include="Order.cs" />
     <Compile Include="PdfCreator.cs" />
     <Compile Include="Program.cs" />

@@ -72,63 +72,66 @@ namespace Restaurantservice
 
             foreach (var orderList in orderLists)
             {
-                nameYCoord += SpaceBeforeHeader();
-                quantityYCoord += SpaceBeforeHeader();
-
-                if (TimeToAddNewPdfPage(nameYCoord))
-                {
-                    graph = AddPdfPage(pdf, graph);
-
-                    pageCounter++;
-                    graph.DrawString(string.Format("Sida: {0}", pageCounter), fontBig, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), 35, 30, XStringFormats.TopLeft);
-
-                    nameXCoord = 40;
-                    nameYCoord = 90;
-                    quantityXCoord = 300;
-                    quantityYCoord = 90;
-                }
-
-                graph.DrawString(orderList.KgPortalUser, fontMedium, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), nameXCoord, nameYCoord, XStringFormats.TopLeft);
-
-                nameYCoord += SpaceAfterText();
-                quantityYCoord += SpaceAfterText();
-
                 if (orderList.OrderList.Count() > 0)
                 {
-                    foreach (var order in orderList.OrderList)
+                    nameYCoord += SpaceBeforeHeader();
+                    quantityYCoord += SpaceBeforeHeader();
+
+                    if (TimeToAddNewPdfPage(nameYCoord))
                     {
-                        if (TimeToAddNewPdfPage(nameYCoord))
+                        graph = AddPdfPage(pdf, graph);
+
+                        pageCounter++;
+                        graph.DrawString(string.Format("Sida: {0}", pageCounter), fontBig, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), 35, 30, XStringFormats.TopLeft);
+
+                        nameXCoord = 40;
+                        nameYCoord = 90;
+                        quantityXCoord = 300;
+                        quantityYCoord = 90;
+                    }
+
+                    graph.DrawString(orderList.KgPortalUser, fontMedium, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), nameXCoord, nameYCoord, XStringFormats.TopLeft);
+
+                    nameYCoord += SpaceAfterText();
+                    quantityYCoord += SpaceAfterText();
+
+                    if (orderList.OrderList.Count() > 0)
+                    {
+                        foreach (var order in orderList.OrderList)
                         {
-                            graph = AddPdfPage(pdf, graph);
+                            if (TimeToAddNewPdfPage(nameYCoord))
+                            {
+                                graph = AddPdfPage(pdf, graph);
 
-                            pageCounter++;
-                            graph.DrawString(string.Format("Sida: {0}", pageCounter), fontBig, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), 35, 30, XStringFormats.TopLeft);
+                                pageCounter++;
+                                graph.DrawString(string.Format("Sida: {0}", pageCounter), fontBig, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), 35, 30, XStringFormats.TopLeft);
 
-                            nameXCoord = 40;
-                            nameYCoord = 90;
-                            quantityXCoord = 300;
-                            quantityYCoord = 90;
+                                nameXCoord = 40;
+                                nameYCoord = 90;
+                                quantityXCoord = 300;
+                                quantityYCoord = 90;
+                            }
+
+                            graph.DrawString(order.DishName, fontSmall, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), nameXCoord, nameYCoord, XStringFormats.TopLeft);
+
+                            string quantityPlusInfoText = order.Quantity.ToString() + order.InfoText;
+                            graph.DrawString(quantityPlusInfoText, fontSmall, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), quantityXCoord, quantityYCoord, XStringFormats.TopLeft);
+
+                            nameYCoord += SpaceAfterText();
+                            quantityYCoord += SpaceAfterText();
                         }
-
-                        graph.DrawString(order.DishName, fontSmall, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), nameXCoord, nameYCoord, XStringFormats.TopLeft);
-
-                        string quantityPlusInfoText = order.Quantity.ToString() + order.InfoText;
-                        graph.DrawString(quantityPlusInfoText, fontSmall, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), quantityXCoord, quantityYCoord, XStringFormats.TopLeft);
+                        graph.DrawString("Totalt antal luncher", fontSmallBold, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), nameXCoord, nameYCoord, XStringFormats.TopLeft);
+                        graph.DrawString(orderList.TotalDishCount.ToString(), fontSmallBold, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), quantityXCoord, quantityYCoord, XStringFormats.TopLeft);
 
                         nameYCoord += SpaceAfterText();
                         quantityYCoord += SpaceAfterText();
                     }
-                    graph.DrawString("Totalt antal luncher", fontSmallBold, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), nameXCoord, nameYCoord, XStringFormats.TopLeft);
-                    graph.DrawString(orderList.TotalDishCount.ToString(), fontSmallBold, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), quantityXCoord, quantityYCoord, XStringFormats.TopLeft);
-
-                    nameYCoord += SpaceAfterText();
-                    quantityYCoord += SpaceAfterText();
-                }
-                else if (orderList.OrderList.Count() == 0)
-                {
-                    graph.DrawString("Det finns inga beställningar för denna dag.", fontSmall, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), nameXCoord, nameYCoord, XStringFormats.TopLeft);
-                    nameYCoord += SpaceAfterText();
-                    quantityYCoord += SpaceAfterText();
+                    else if (orderList.OrderList.Count() == 0)
+                    {
+                        graph.DrawString("Det finns inga beställningar för denna dag.", fontSmall, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), nameXCoord, nameYCoord, XStringFormats.TopLeft);
+                        nameYCoord += SpaceAfterText();
+                        quantityYCoord += SpaceAfterText();
+                    }
                 }
             }
 
