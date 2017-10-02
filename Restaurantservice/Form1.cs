@@ -50,7 +50,7 @@ namespace Restaurantservice
             rbnRealDatabase.Checked = true;
             rbnRealDatabase.Enabled = false;
             rbnTestDataBase.Enabled = false;
-            lblVersion.Text = "Version: 1.7 - 17-09-25";
+            lblVersion.Text = "Version: 1.8 - 17-10-02";
 
             DataBaseVersion = DATABASELIVE;
 
@@ -585,24 +585,7 @@ namespace Restaurantservice
                 }
             }
 
-            //int ordersCounter = 0;
-
-            //ordersCounter += allDrinks.Count();
-            //ordersCounter += allSallad.Count();
-
-            //foreach (var item in groupOrdersList)
-            //{
-            //    ordersCounter += item.Orders.Count();
-            //}
-            if (ordersInCount == returnList.Count())
-            {
-                return returnList;
-
-            }
-            else
-            {
-                return null;
-            }
+            return returnList;
         }
 
         private static List<GroupOrders> SortLabelsByGroup(List<Order> orders)
@@ -709,7 +692,7 @@ namespace Restaurantservice
 
             if (_eastereggstring == "1302")
             {
-                MessageBox.Show("Kniv och gaffel är den bästa restaurangen i världen!");
+                System.Diagnostics.Process.Start("http://www.hamsterdance.org/hamsterdance/");
             }
         }
 

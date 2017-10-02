@@ -13,8 +13,6 @@ namespace Restaurantservice
 {
     public class DataAccess
     {
-        public static string testString = "Commit";
-
         private static MySqlConnection GetSqlConnection()
         {
             var conn = new MySqlConnection();
@@ -24,12 +22,24 @@ namespace Restaurantservice
             if (dataBaseVersion == Form1.DATABASELIVE)
             {
                 // Kniv och gaffel
-                conn.ConnectionString = "server=mysql201.loopia.se; userid=admin@k159216; password=JeokDeeVCz; database=knivochgaffel_se;";
+                string password = ConfigurationManager.AppSettings["PasswordProd"];
+                string server = ConfigurationManager.AppSettings["ServerProd"];
+                string userid = ConfigurationManager.AppSettings["UserIdProd"];
+                string database = ConfigurationManager.AppSettings["DatabaseProd"];
+
+                conn.ConnectionString = string.Format("server={0}; userid={1}; password={2}; database={3};",
+                    server, userid, password, database);
             }
             else if (dataBaseVersion == Form1.DATABASETEST)
             {
-                // Brädgård_nu
-                conn.ConnectionString = "server=mysql507.loopia.se; userid=wp_admin@b113010; password=mediakonsten99; database=bradgard_nu;";
+                string password = ConfigurationManager.AppSettings["PasswordTest"];
+                string server = ConfigurationManager.AppSettings["ServerTest"];
+                string userid = ConfigurationManager.AppSettings["UserIdTest"];
+                string database = ConfigurationManager.AppSettings["DatabaseTest"];
+
+                // Brädgård
+                conn.ConnectionString = string.Format("server={0}; userid={1}; password={2}; database={3};",
+                    server, userid, password, database);
             }
             return conn;
         }
@@ -60,7 +70,7 @@ namespace Restaurantservice
                                 + deliveryDate
                                 + "'";
 
-               
+
 
                 MySqlCommand cmd = new MySqlCommand(query, conn);
                 rdr = cmd.ExecuteReader();
