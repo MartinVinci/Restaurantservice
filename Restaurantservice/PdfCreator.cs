@@ -433,9 +433,9 @@ namespace Restaurantservice
                 graph.DrawString("Lev kall", fontSmall, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), c.ColdXcoord, c.ColdYcoord, XStringFormats.Center);
             }
 
-            if (label.SpecialPackaging)
+            if (label.CaseGroup != string.Empty)
             {
-                graph.DrawString("Specialpack", fontSmall, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), c.SpecXcoord, c.SpecYcoord, XStringFormats.Center);
+                graph.DrawString(("Väska " + label.CaseGroup), fontSmall, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), c.SpecXcoord, c.SpecYcoord, XStringFormats.Center);
             }
 
             if (label.NoRice)

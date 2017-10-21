@@ -50,7 +50,7 @@ namespace Restaurantservice
             rbnRealDatabase.Checked = true;
             rbnRealDatabase.Enabled = false;
             rbnTestDataBase.Enabled = false;
-            lblVersion.Text = "Version: 1.8 - 17-10-02";
+            lblVersion.Text = "Version: 1.10 - 17-10-21";
 
             DataBaseVersion = DATABASELIVE;
 
@@ -294,40 +294,46 @@ namespace Restaurantservice
                                                  where o.Addr == addr
                                                  select o).ToList();
 
-                    List<Order> specialPackOrdersForAddr = GetSpecialPackOrders(ordersForAddr);
+                    List<string> caseGroups = (from hits in ordersForAddr
+                                               select hits.CaseGroup).Distinct().ToList();
 
-                    // TODO kolla att rätt tas bort
-                    ordersForAddr = ordersForAddr.Except(specialPackOrdersForAddr).ToList();
+                    // Order by alphabetic order
+                    caseGroups = (from hits in caseGroups
+                                  orderby hits ascending
+                                  select hits).ToList();
 
-                    // Add normal orders
-                    var normalTentativeOrderList = CreateTentativeOrderList(addr, ordersForAddr);
-                    listOfTentativeOrderList.Add(normalTentativeOrderList);
+                    foreach (var caseGroup in caseGroups)
+                    {
+                        // Get the orders that matches the group
+                        var caseGroupOrders = (from hits in ordersForAddr
+                                               where hits.CaseGroup == caseGroup
+                                               select hits).ToList();
 
-                    // Add specialpack orders
-                    var specialPackTentativeOrderList = CreateTentativeOrderList((addr + " specialpack"), specialPackOrdersForAddr);
-                    listOfTentativeOrderList.Add(specialPackTentativeOrderList);
+                        string addrNameAndCase = string.Format("{0} - Väska {1}", addr, caseGroup);
+
+                        var tentativeOrderList = CreateTentativeOrderList(addrNameAndCase, caseGroupOrders);
+                        listOfTentativeOrderList.Add(tentativeOrderList);
+                    }
+
+                    #region saved and copied code to remove after development
+                    //List<Order> specialPackOrdersForAddr = GetSpecialPackOrders(ordersForAddr);
+
+                    //// TODO kolla att rätt tas bort
+                    //ordersForAddr = ordersForAddr.Except(specialPackOrdersForAddr).ToList();
+
+                    //// Add normal orders
+                    //var normalTentativeOrderList = CreateTentativeOrderList(addr, ordersForAddr);
+                    //listOfTentativeOrderList.Add(normalTentativeOrderList);
+
+                    //// Add specialpack orders
+                    //var specialPackTentativeOrderList = CreateTentativeOrderList((addr + " specialpack"), specialPackOrdersForAddr);
+                    //listOfTentativeOrderList.Add(specialPackTentativeOrderList);
+                    #endregion
                 }
 
-                // Add total tentative orders to print after everything else
+                // Add total orders to print after everything else
                 var totalOrdersTentList = CreateTentativeOrderList("- - TOTALT - -", allOrdersFromDB);
                 listOfTentativeOrderList.Add(totalOrdersTentList);
-
-                List<Order> allSpecialPackOrders = GetSpecialPackOrders(allOrdersFromDB);
-
-                allOrdersFromDB = allOrdersFromDB.Except(allSpecialPackOrders).ToList();
-
-                //// Add only normal orders
-                //var allNormalOrdersTentList = CreateTentativeOrderList("- - Totalt normala beställningar - -", allOrdersFromDB);
-                //listOfTentativeOrderList.Add(allNormalOrdersTentList);
-
-                //// Add tentative orders
-                //var allSpecialPackOrdersTentList = CreateTentativeOrderList("- - Totalt specialpack beställningar - -", allSpecialPackOrders);
-                //listOfTentativeOrderList.Add(allSpecialPackOrdersTentList);
-
-                //var allTentativeOrders = GetTentativeOrders(allOrdersFromDB);
-                //int allTotalDishCount = GetTotalDishCount(allTentativeOrders);
-                //TentativeOrderList tentListTotal = new TentativeOrderList("- - Totalt - - ", allTentativeOrders, allTotalDishCount);
-                //listOfTentativeOrderList.Add(tentListTotal);
 
                 PdfCreator.CreateTentativeOrders(listOfTentativeOrderList, deliveryDate, pickupRest);
                 MessageBox.Show("Preliminära beställningar skapade!");
@@ -501,27 +507,15 @@ namespace Restaurantservice
              4 = Dryck
              5 = Övrigt
 
-            Först kommer alla ”Varm dagens”. Det innebär att först kommer alla varma dagens för Grupp A, 
-              sedan alla varma dagens för Bellis och sedan alla varma dagens för Oxievång.
             Först kommer alla "Varm dagens" Det innebär att först kommer alla varma dagens för Grupp A 
               sedan kommer alla avvikande till Grupp A såom kallt, gluten ris etc
             
-            Därefter kommer alla drycker. Först kommer alla mjölk för Grupp A, sedan alla mjölk 
-              för Bellis och sedan alla mjölk för Oxievång.Sedan kommer alla öl för Grupp A, alla öl för Bellis och alla öl för Oxievång.
             Därefter kommer alla drycker indelade gruppvis Grupp A mjölk, lättöl, måltidsdryck och 
               mineralvatten.Därefter kommer nästa Bellis osv.
             
-            Sedan kommer ALLA specialpack. Det innebär alltså specialpack får såväl dagens som för 
-              fläskstek. För specialpack sorterar jag alla Grupp A för sig(dvs dagens och fläskstek blandat), sedan alla Bellis för sig(dvs dagens och fläskstek blandat).Jag uppskattar att detta är lättast att hantera vid packningen, dvs att det är viktigare att Grupp A får alla sina specialpack tillsammans på etiketterna än att först ha alla specialpack - dagens per grupp, sedan specialpack - fläskstek per grupp.
             Specialpack hanteras som reglerna ovan men som en egen grupp. Så sorteringen blir "Grupp A", 
               "Grupp A specialpack", "Bellis", "Bellis specialpack" osv.
-            
-            Martin tolkar specialpack som bara för mat, dvs att drycker som tillhör specialpack finns 
-              tillsammans med alla andra drycker.
-            Det är riktigt med förtydligande om att det är en egen grupp
-            
-            Sedan kommer alla övriga specialare.Alla specialare är grupperade per grupp, 
-              vilket innebär att samtliga specialare för Grupp A kommer tillsammans, sedan kommer samtliga specialare för Bellis och sen samtliga specialare för Oxievång. Även här uppfattar jag det som lättare vid packningen att ha alla Grupp As etiketter samlade än att splitta upp dem för den lilla vinsten att få samtliga utan ris tillsammans.
+                        
             Alla specialare sorteras in sist inom varje grupp (det blir nog lättare vid sorteringen)
             
             Ovan innebär alltså också att "Sallad" kommer blandat, dvs uppdelat per grupp för 
@@ -533,6 +527,7 @@ namespace Restaurantservice
             var ordersInCount = orders.Count();
             #endregion
 
+            // Drinks and sallad is sorted after all meals so lets put them aside in seperate lists.
             var allDrinks = (from hits in orders
                              where hits.ProductGroup == 4
                              select hits).ToList();
@@ -594,8 +589,8 @@ namespace Restaurantservice
 
             foreach (var order in orders)
             {
-                string specialPackText = order.SpecialPackaging ? " Specialpack" : "";
-                string groupName = order.Addr + specialPackText;
+                string caseName = " - Väska " + order.CaseGroup;
+                string groupName = order.Addr + caseName;
 
                 // Does the groupName already exists?
                 var group = (from hits in groupOrdersList
@@ -672,6 +667,15 @@ namespace Restaurantservice
 
             return orders;
 
+        }
+        private static List<Order> AddCaseGroupToAddressName(List<Order> orders)
+        {
+            foreach (var order in orders)
+            {
+                order.Addr = string.Format("{0} - Väska {1}", order.Addr, order.CaseGroup);
+            }
+
+            return orders;
         }
         #endregion
         #region Easter egg

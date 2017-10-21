@@ -60,7 +60,7 @@ namespace Restaurantservice
                 //conn = new MySqlConnection(cs);
                 conn.Open();
 
-                string query = "SELECT bru.firstname, bru.lastname, pro.product_name, ord.delivery_date, bru.delivery_street, ord.served_cold, meta1.meta_value, meta2.meta_value, ord.special_packaging, ord.no_rice, ord.gluten_free, pro.product_group, ord.no_lactose " +
+                string query = "SELECT bru.firstname, bru.lastname, pro.product_name, ord.delivery_date, bru.delivery_street, ord.served_cold, meta1.meta_value, meta2.meta_value, ord.special_packaging, ord.no_rice, ord.gluten_free, pro.product_group, ord.no_lactose, ord.packaging_type " +
                                 "FROM kgportal_orders as ord " +
                                 "INNER JOIN kgportal_brukare as bru ON ord.customer = bru.id " +
                                 "INNER JOIN kgportal_products as pro ON ord.item_id = pro.id " +
@@ -88,10 +88,11 @@ namespace Restaurantservice
                     bool glutenFree = rdr.GetBoolean(10);
                     int productGroup = rdr.GetInt32(11);
                     bool noLactose = rdr.GetBoolean(12);
+                    string packagingType = rdr.GetString(13);
 
                     date = date.Substring(0, 10);
 
-                    Order order = new Order(name, dish, date, addr, cold, pickupRest, specialPackaging, noRice, glutenFree, productGroup, noLactose);
+                    Order order = new Order(name, dish, date, addr, cold, pickupRest, specialPackaging, noRice, glutenFree, productGroup, noLactose, packagingType);
 
                     if (order.PickupRestaurant.ToLower() == pickupRestaurant)
                     {
