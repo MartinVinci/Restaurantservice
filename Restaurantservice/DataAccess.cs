@@ -29,6 +29,8 @@ namespace Restaurantservice
 
                 conn.ConnectionString = string.Format("server={0}; userid={1}; password={2}; database={3};",
                     server, userid, password, database);
+
+
             }
             else if (dataBaseVersion == Form1.DATABASETEST)
             {

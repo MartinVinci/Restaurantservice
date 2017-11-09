@@ -297,22 +297,32 @@ namespace Restaurantservice
                     List<string> caseGroups = (from hits in ordersForAddr
                                                select hits.CaseGroup).Distinct().ToList();
 
-                    // Order by alphabetic order
+                    // Order by alphabetic (numeric) order
                     caseGroups = (from hits in caseGroups
                                   orderby hits ascending
                                   select hits).ToList();
 
-                    foreach (var caseGroup in caseGroups)
+                    // If the address has not been activated for väskor, we dont need to loop the caseGroups
+                    if (caseGroups.Count() == 1 && caseGroups[0] == "")
                     {
-                        // Get the orders that matches the group
-                        var caseGroupOrders = (from hits in ordersForAddr
-                                               where hits.CaseGroup == caseGroup
-                                               select hits).ToList();
-
-                        string addrNameAndCase = string.Format("{0} - Väska {1}", addr, caseGroup);
-
-                        var tentativeOrderList = CreateTentativeOrderList(addrNameAndCase, caseGroupOrders);
+                        var tentativeOrderList = CreateTentativeOrderList(addr, ordersForAddr);
                         listOfTentativeOrderList.Add(tentativeOrderList);
+                    }
+                    else
+                    {
+                        foreach (var caseGroup in caseGroups)
+                        {
+                            // Get the orders that matches the group
+                            var caseGroupOrders = (from hits in ordersForAddr
+                                                   where hits.CaseGroup == caseGroup
+                                                   select hits).ToList();
+
+                            string addrNameAndCase = string.Format("{0} - Väska {1}", addr, caseGroup);
+
+                            var tentativeOrderList = CreateTentativeOrderList(addrNameAndCase, caseGroupOrders);
+                            listOfTentativeOrderList.Add(tentativeOrderList);
+                        }
+
                     }
 
                     #region saved and copied code to remove after development
@@ -612,6 +622,8 @@ namespace Restaurantservice
                 // Add order to group
                 group.Orders.Add(order);
             }
+
+            groupOrdersList = groupOrdersList.OrderBy(o => o.GroupName).ToList();
 
             return groupOrdersList;
         }
