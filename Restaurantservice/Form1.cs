@@ -38,8 +38,11 @@ namespace Restaurantservice
         }
         private void DevelopmentInitialize()
         {
-            //CreateLabels(DateTime.Now.ToShortDateString(), false, PICKUP_JAGERSRO);
 
+            //CreateLabels(DateTime.Now.ToShortDateString(), false, PICKUP_JAGERSRO);
+            //CreateLabels("2017-12-13", false, PICKUP_JAGERSRO);
+
+            //DataBaseVersion = DATABASETEST;
             //CreateTentativeOrders(DateTime.Now, PICKUP_JAGERSRO);
 
         }
@@ -50,7 +53,7 @@ namespace Restaurantservice
             rbnRealDatabase.Checked = true;
             rbnRealDatabase.Enabled = false;
             rbnTestDataBase.Enabled = false;
-            lblVersion.Text = "Version: 1.10 - 17-10-21";
+            lblVersion.Text = "Version: 2.1 - 18-06-26";
 
             DataBaseVersion = DATABASELIVE;
 
@@ -294,51 +297,36 @@ namespace Restaurantservice
                                                  where o.Addr == addr
                                                  select o).ToList();
 
-                    List<string> caseGroups = (from hits in ordersForAddr
-                                               select hits.CaseGroup).Distinct().ToList();
+                    List<string> typeGroups = (from hits in ordersForAddr
+                                               select hits.TypeGroup).Distinct().ToList();
 
                     // Order by alphabetic (numeric) order
-                    caseGroups = (from hits in caseGroups
+                    typeGroups = (from hits in typeGroups
                                   orderby hits ascending
                                   select hits).ToList();
 
-                    // If the address has not been activated for väskor, we dont need to loop the caseGroups
-                    if (caseGroups.Count() == 1 && caseGroups[0] == "")
+                    // If the address has not been activated for väskor, we dont need to loop the typeGroups
+                    if (typeGroups.Count() == 1 && typeGroups[0] == "")
                     {
                         var tentativeOrderList = CreateTentativeOrderList(addr, ordersForAddr);
                         listOfTentativeOrderList.Add(tentativeOrderList);
                     }
                     else
                     {
-                        foreach (var caseGroup in caseGroups)
+                        foreach (var typeGroup in typeGroups)
                         {
                             // Get the orders that matches the group
-                            var caseGroupOrders = (from hits in ordersForAddr
-                                                   where hits.CaseGroup == caseGroup
+                            var typeGroupOrders = (from hits in ordersForAddr
+                                                   where hits.TypeGroup == typeGroup
                                                    select hits).ToList();
 
-                            string addrNameAndCase = string.Format("{0} - Väska {1}", addr, caseGroup);
+                            string addrNameAndType = string.Format("{0} - Väska {1}", addr, typeGroup);
 
-                            var tentativeOrderList = CreateTentativeOrderList(addrNameAndCase, caseGroupOrders);
+                            var tentativeOrderList = CreateTentativeOrderList(addrNameAndType, typeGroupOrders);
                             listOfTentativeOrderList.Add(tentativeOrderList);
                         }
 
                     }
-
-                    #region saved and copied code to remove after development
-                    //List<Order> specialPackOrdersForAddr = GetSpecialPackOrders(ordersForAddr);
-
-                    //// TODO kolla att rätt tas bort
-                    //ordersForAddr = ordersForAddr.Except(specialPackOrdersForAddr).ToList();
-
-                    //// Add normal orders
-                    //var normalTentativeOrderList = CreateTentativeOrderList(addr, ordersForAddr);
-                    //listOfTentativeOrderList.Add(normalTentativeOrderList);
-
-                    //// Add specialpack orders
-                    //var specialPackTentativeOrderList = CreateTentativeOrderList((addr + " specialpack"), specialPackOrdersForAddr);
-                    //listOfTentativeOrderList.Add(specialPackTentativeOrderList);
-                    #endregion
                 }
 
                 // Add total orders to print after everything else
@@ -427,6 +415,13 @@ namespace Restaurantservice
                     where hits.NoLactose == true
                     select hits).Count();
         }
+        private int GetTimbal(List<Order> subOrders)
+        {
+            return (from hits in subOrders
+                    where hits.Timbal == true
+                    select hits).Count();
+        }
+
         private string GetInfoText(List<Order> subOrders)
         {
             string returnText = "";
@@ -435,8 +430,9 @@ namespace Restaurantservice
             int noGluten = GetNoGluten(subOrders);
             int noLactose = GetNoLactose(subOrders);
             int noRiceOrGluten = GetNoRiceAndGluten(subOrders);
+            int timbal = GetTimbal(subOrders);
 
-            if (noRice > 0 || noGluten > 0 || noLactose > 0)
+            if (noRice > 0 || noGluten > 0 || noLactose > 0 || timbal > 0)
             {
                 returnText += ", varav ";
             }
@@ -457,6 +453,10 @@ namespace Restaurantservice
             {
                 returnText += string.Format("{0} ej ris ELLER gluten.", noRiceOrGluten);
             }
+            if (timbal > 0)
+            {
+                returnText += string.Format("{0} timbal. ", timbal);
+            }
 
             return returnText;
         }
@@ -468,7 +468,7 @@ namespace Restaurantservice
 
         private bool GetIsCountableDish(List<Order> subOrders)
         {
-            if (subOrders[0].ProductGroup == 1 || subOrders[0].ProductGroup == 2)
+            if (subOrders[0].ProductGroup == 1 || subOrders[0].ProductGroup == 2 || subOrders[0].ProductGroup == 6)
             {
                 return true;
             }
@@ -599,8 +599,9 @@ namespace Restaurantservice
 
             foreach (var order in orders)
             {
-                string caseName = " - Väska " + order.CaseGroup;
-                string groupName = order.Addr + caseName;
+                string typeName = " - Väska " + order.TypeGroup + " - " + order.CaseGroup;
+
+                string groupName = order.Addr + typeName;
 
                 // Does the groupName already exists?
                 var group = (from hits in groupOrdersList
@@ -631,20 +632,32 @@ namespace Restaurantservice
         {
             var returnList = new List<Order>();
 
+            // Get all normal daily specials
             var normalDailySpecials = (from hits in orders
-                                       where hits.ProductGroup == 1 && hits.NoGluten == false && hits.NoLactose == false && hits.NoRice == false && hits.DeliverCold == false
+                                       where hits.ProductGroup == 1 && hits.NoGluten == false && hits.NoLactose == false && hits.NoRice == false && hits.DeliverCold == false && hits.Timbal == false
                                        select hits).ToList();
+
             orders = orders.Except(normalDailySpecials).ToList();
 
+            // Get all with no rice
+            var noRiceDailySpecials = (from hits in orders
+                                       where hits.NoRice == true
+                                       select hits).ToList();
+
+            orders = orders.Except(noRiceDailySpecials).ToList();
+
+            // Get (sort) the rest
             orders = (from hits in orders
                       orderby hits.Dish
                       select hits).ToList();
 
             returnList.AddRange(normalDailySpecials);
+            returnList.AddRange(noRiceDailySpecials);
             returnList.AddRange(orders);
 
             return returnList;
         }
+
         private static List<Order> SortGroupOrdersSalladIndividually(List<Order> orders)
         {
             orders = (from hits in orders
@@ -665,29 +678,22 @@ namespace Restaurantservice
         {
             for (int i = orders.Count() - 1; i >= 0; i--)
             {
-                if (orders[i].Dish == "Hemgravad norsk fjordlax")
+                if (orders[i].Dish == "7. Hemgravad norsk fjordlax")
                 {
-                    //var orderCopy = orders[i];
                     var orderCopy = new Order(orders[i]);
 
                     orders.Insert(i + 1, orderCopy);
                     orders[i].Name += " 1/2";
                     orders[i + 1].Name += " 2/2";
+                }
+                else
+                {
 
                 }
             }
 
             return orders;
 
-        }
-        private static List<Order> AddCaseGroupToAddressName(List<Order> orders)
-        {
-            foreach (var order in orders)
-            {
-                order.Addr = string.Format("{0} - Väska {1}", order.Addr, order.CaseGroup);
-            }
-
-            return orders;
         }
         #endregion
         #region Easter egg
