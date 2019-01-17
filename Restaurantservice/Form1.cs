@@ -28,8 +28,15 @@ namespace Restaurantservice
         public static int LEFT_COLUMN_ADJUST = Int32.Parse(ConfigurationManager.AppSettings["LeftColumnPosition"]);
         public static int RIGHT_COLUMN_ADJUST = Int32.Parse(ConfigurationManager.AppSettings["RigthColumnPosition"]);
 
+        public static List<string> extraLabelList = new List<string>()
+        {
+            //TODO: Fixa listan när Niklas återkommit
+            "7. Hemgravad norsk fjordlax",
+            "Bakad potatis",
+        };
 
         public static string DataBaseVersion = "";
+
         public Form1()
         {
             InitializeComponent();
@@ -496,7 +503,7 @@ namespace Restaurantservice
                 orders = SortOrdersToMatchProductionNeeds(orders);
 
                 // Add a second label to Norsk Fjordlax
-                orders = AddLabelForNorskFjordlax(orders);
+                orders = AddExtraLabelWhereWanted(orders);
 
                 PdfCreator.CreateLabels(orders, date, tomorrow);
 
@@ -674,21 +681,17 @@ namespace Restaurantservice
 
             return orders;
         }
-        private static List<Order> AddLabelForNorskFjordlax(List<Order> orders)
+        private static List<Order> AddExtraLabelWhereWanted(List<Order> orders)
         {
             for (int i = orders.Count() - 1; i >= 0; i--)
             {
-                if (orders[i].Dish == "7. Hemgravad norsk fjordlax")
+                if (extraLabelList.Any(s => orders[i].Dish.Contains(s)))
                 {
                     var orderCopy = new Order(orders[i]);
 
                     orders.Insert(i + 1, orderCopy);
                     orders[i].Name += " 1/2";
                     orders[i + 1].Name += " 2/2";
-                }
-                else
-                {
-
                 }
             }
 
