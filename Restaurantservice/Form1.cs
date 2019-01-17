@@ -43,7 +43,7 @@ namespace Restaurantservice
             rbnRealDatabase.Checked = true;
             rbnRealDatabase.Enabled = false;
             rbnTestDataBase.Enabled = false;
-            lblVersion.Text = "Version: 2.1 - 18-06-26";
+            lblVersion.Text = "Version: 2.2 - 19-01-17";
 
             DataBaseVersion = DATABASELIVE;
 
