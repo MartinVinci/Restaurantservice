@@ -9,7 +9,6 @@ namespace Restaurantservice.Logic
     {
         private static List<string> extraLabelList = new List<string>()
         {
-            //TODO: Fixa listan när Niklas återkommit
             "7. Hemgravad norsk fjordlax",
             "Bakad potatis",
         };

@@ -90,7 +90,6 @@ namespace Restaurantservice
                                   select hits).FirstOrDefault();
 
             return row != null ? row.Amount.ToString() : "";
-        
         }
 
         private static string GetAmountRodSpatta(List<InvoiceDataRow> dataRows)
