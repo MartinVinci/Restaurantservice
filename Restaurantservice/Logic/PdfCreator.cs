@@ -121,7 +121,7 @@ namespace Restaurantservice
                             quantityYCoord += SpaceAfterText();
                         }
                         graph.DrawString("Totalt antal luncher", fontSmallBold, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), nameXCoord, nameYCoord, XStringFormats.TopLeft);
-                        graph.DrawString(orderList.TotalDishCount.ToString(), fontSmallBold, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), quantityXCoord, quantityYCoord, XStringFormats.TopLeft);
+                        graph.DrawString(orderList.TotalDishCountInfo.ToString(), fontSmallBold, new XSolidBrush(XColor.FromCmyk(0, 0, 0, 100)), quantityXCoord, quantityYCoord, XStringFormats.TopLeft);
 
                         nameYCoord += SpaceAfterText();
                         quantityYCoord += SpaceAfterText();

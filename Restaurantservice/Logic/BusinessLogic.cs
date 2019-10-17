@@ -114,10 +114,7 @@ namespace Restaurantservice.Logic
             // 1 is daily specials
             // 2 is other hot dishes
             // 6 is timbal
-            var coldCategories = new List<int>()
-            {
-                1, 2, 6
-            };
+            var coldCategories = GetMainDishCategories();
 
             var delColdDishes = (from hits in allOrdersFromDB
                                  where hits.DeliverCold == true && coldCategories.Contains(hits.ProductGroup)
@@ -130,8 +127,8 @@ namespace Restaurantservice.Logic
         {
             List<TentativeOrder> tentativeOrders = GetTentativeOrders(orderList);
 
-            int totalDishCount = GetTotalDishCount(tentativeOrders);
-            TentativeOrderList tentList = new TentativeOrderList(address, tentativeOrders, totalDishCount);
+            string totalDishCountInfo = GetTotalDishCountInfo(orderList);
+            TentativeOrderList tentList = new TentativeOrderList(address, tentativeOrders, totalDishCountInfo);
 
             return tentList;
         }
@@ -142,20 +139,45 @@ namespace Restaurantservice.Logic
                     select hits).ToList();
         }
 
-        private static int GetTotalDishCount(List<TentativeOrder> tentativeOrders)
+        private static List<int> GetMainDishCategories()
         {
-            int returnInt = 0;
-
-            foreach (var tent in tentativeOrders)
+            return new List<int>()
             {
-                if (tent.IsCountableDish)
-                {
-                    returnInt += tent.Quantity;
-                }
-            }
-
-            return returnInt;
+                1, 2, 6
+            };
         }
+
+        private static string GetTotalDishCountInfo(List<Order> orders)
+        {
+            string returnString = string.Empty;
+
+            var coldCategories = GetMainDishCategories();
+
+            var countableDishes = (from hits in orders
+                                   where coldCategories.Contains(hits.ProductGroup)
+                                   select hits).ToList();
+
+            string totalDishCount = countableDishes.Count().ToString();
+
+            var salladsList = (from hits in countableDishes
+                               where hits.Dish.ToLower().Contains("salladstallrik")
+                               select hits).ToList();
+            countableDishes = countableDishes.Except(salladsList).ToList();
+
+            var deliverColdList = (from hits in countableDishes
+                                   where hits.DeliverCold == true
+                                   select hits).ToList();
+            countableDishes = countableDishes.Except(deliverColdList).ToList();
+
+            returnString = string.Format("{0} ( {1}  +  {2}  +  {3} )",
+                totalDishCount,
+                countableDishes.Count().ToString(),
+                deliverColdList.Count().ToString(),
+                salladsList.Count().ToString());
+
+            return returnString;
+        }
+
         private static List<TentativeOrder> GetTentativeOrders(List<Order> orders)
         {
             List<string> uniqueDishes = (from o in orders
