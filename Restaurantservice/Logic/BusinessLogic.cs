@@ -73,8 +73,22 @@ namespace Restaurantservice.Logic
                 // Add total orders for deliver cold after that
                 listOfTentativeOrderList.Add(GetTotalDeliverCold(allOrdersFromDB));
 
+                pickupRest = ChangeMobiliaToAnneberg(pickupRest);
                 PdfCreator.CreateTentativeOrders(listOfTentativeOrderList, deliveryDate, pickupRest);
                 MessageBox.Show("Preliminära beställningar skapade!");
+            }
+        }
+
+        private static string ChangeMobiliaToAnneberg(string pickupRest)
+        {
+            // Since 'mobilia' is returned from the database, we can't change everyvalue in the code from mobilia to anneberg.
+            if (pickupRest.ToLower() == "mobilia")
+            {
+                return "anneberg";
+            }
+            else
+            {
+                return pickupRest;
             }
         }
 
@@ -169,7 +183,7 @@ namespace Restaurantservice.Logic
                                    select hits).ToList();
             countableDishes = countableDishes.Except(deliverColdList).ToList();
 
-            returnString = string.Format("{0} ( {1}  +  {2}  +  {3} )",
+            returnString = string.Format("{0}  ( {1}  +  {2}  +  {3} )",
                 totalDishCount,
                 countableDishes.Count().ToString(),
                 deliverColdList.Count().ToString(),
