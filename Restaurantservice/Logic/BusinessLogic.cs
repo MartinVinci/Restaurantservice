@@ -282,9 +282,16 @@ namespace Restaurantservice.Logic
                              select hits).ToList();
             orders = orders.Except(allSallad).ToList();
 
+            // Dishes with "lev kall" should be last of all, even after drinks and sallad
+            var allDeliverCold = (from hits in orders
+                                  where hits.DeliverCold
+                                  select hits).ToList();
+            orders = orders.Except(allDeliverCold).ToList();
+
             var groupOrdersListFood = SortLabelsByGroup(orders);
             var groupOrdersListDrink = SortLabelsByGroup(allDrinks);
             var groupOrdersListSallad = SortLabelsByGroup(allSallad);
+            var groupOrdersListDelCold = SortLabelsByGroup(allDeliverCold);
 
             // Sort each individually
             foreach (var group in groupOrdersListFood)
@@ -299,7 +306,10 @@ namespace Restaurantservice.Logic
             {
                 group.Orders = SortGroupOrdersSalladIndividually(group.Orders);
             }
-
+            foreach (var group in groupOrdersListDelCold)
+            {
+                group.Orders = SortGroupOrdersDeliverColdIndividually(group.Orders);
+            }
 
             var returnList = new List<Order>();
             foreach (var group in groupOrdersListFood)
@@ -317,6 +327,13 @@ namespace Restaurantservice.Logic
                 }
             }
             foreach (var group in groupOrdersListSallad)
+            {
+                foreach (var order in group.Orders)
+                {
+                    returnList.Add(order);
+                }
+            }
+            foreach (var group in groupOrdersListDelCold)
             {
                 foreach (var order in group.Orders)
                 {
@@ -399,6 +416,14 @@ namespace Restaurantservice.Logic
             return orders;
         }
         private static List<Order> SortGroupOrdersDrinksIndividually(List<Order> orders)
+        {
+            orders = (from hits in orders
+                      orderby hits.Addr, hits.Dish
+                      select hits).ToList();
+
+            return orders;
+        }
+        private static List<Order> SortGroupOrdersDeliverColdIndividually(List<Order> orders)
         {
             orders = (from hits in orders
                       orderby hits.Addr, hits.Dish
