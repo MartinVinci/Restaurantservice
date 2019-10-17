@@ -70,10 +70,14 @@ namespace Restaurantservice.Logic
                 var totalOrdersTentList = CreateTentativeOrderList("- - TOTALT - -", allOrdersFromDB);
                 listOfTentativeOrderList.Add(totalOrdersTentList);
 
+                // Add total orders for deliver cold after that
+                listOfTentativeOrderList.Add(GetTotalDeliverCold(allOrdersFromDB));
+
                 PdfCreator.CreateTentativeOrders(listOfTentativeOrderList, deliveryDate, pickupRest);
                 MessageBox.Show("Preliminära beställningar skapade!");
             }
         }
+
         public static void CreateLabels(string date, bool tomorrow, string pickupRest)
         {
             List<Order> orders = DataAccess.GetTodaysOrders(date, pickupRest);
@@ -102,6 +106,24 @@ namespace Restaurantservice.Logic
                     MessageBox.Show("Etiketter skapade!");
                 }
             }
+        }
+
+        private static TentativeOrderList GetTotalDeliverCold(List<Order> allOrdersFromDB)
+        {
+            // Delivery groups
+            // 1 is daily specials
+            // 2 is other hot dishes
+            // 6 is timbal
+            var coldCategories = new List<int>()
+            {
+                1, 2, 6
+            };
+
+            var delColdDishes = (from hits in allOrdersFromDB
+                                 where hits.DeliverCold == true && coldCategories.Contains(hits.ProductGroup)
+                                 select hits).ToList();
+
+            return CreateTentativeOrderList("- - TOTALT LEV KALL - -", delColdDishes);
         }
 
         private static TentativeOrderList CreateTentativeOrderList(string address, List<Order> orderList)
